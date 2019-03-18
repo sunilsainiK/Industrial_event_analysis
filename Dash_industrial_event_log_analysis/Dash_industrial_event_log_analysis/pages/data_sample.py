@@ -8,40 +8,50 @@ from dash.dependencies import Input, Output, State
 
 
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+df = pd.read_csv('df_raw')
 
-
+df_sum = df.columns.unique()
 PAGE_SIZE = 5
 
 
 data_raw_sample = html.Div(
               html.Div([
-                       html.Div(dash_table.DataTable(
-                                id='table-filtering',
-                                columns=[
-                                    {"name": i, "id": i} for i in sorted(df.columns)
-                                ],
-                                pagination_settings={
-                                    'current_page': 0,
-                                    'page_size': PAGE_SIZE
-                                },
-                                pagination_mode='be',
+                           html.Div(
+                                dash_table.DataTable(
+                                                        id='table-filtering',
+                                                        columns=[
+                                                            {"name": i, "id": i} for i in (df.columns)
+                                                        ],style_header={'fontWeight': 'bold'},
+                                                        pagination_settings={
+                                                            'current_page': 0,
+                                                            'page_size': PAGE_SIZE
+                                                        },
+                                                        pagination_mode='be',
 
-                                filtering='be',
-                                filtering_settings=''
-                            ),style={'width':'40.0%','margin-top':'2%','margin-left': '2.0%'},),
-
-                            html.Div(dcc.Dropdown(id='summary_dropdown',value='dropdownvalue',
-                                    options=[
-                                                {'label': 'correlations', 'value': 'corr'},
-                                                {'label': 'null_values', 'value': 'null'},
-                                                {'label': 'unique_values', 'value': 'unique'},
-                                                {'label': 'stats', 'value': 'stats'}],
+                                                        filtering='be',
+                                                        filtering_settings='',style_table={'overflowX': 'scroll'}
+                                                    ),
+                                               className="five columns",style={'margin-top':'20', 'margin-left':'10'}
                                             ),
-                                        html.Div(id='table-summary'),
-                                                 style={'width':'40.0%','margin-top':'20%','margin-left': '2.0%'}),
 
-                    ]),
+                                        html.Div(dcc.Dropdown(id='summary_dropdown',value='dropdownvalue',
+                                                    options=[
+                                                                {'label': 'correlations', 'value': 'corr'},
+                                                                {'label': 'null_values', 'value': 'null'},
+                                                                {'label': 'unique_values', 'value': 'unique'},
+                                                                {'label': 'stats', 'value': 'stats'}
+                                                            ],
+                                                    ),
+                                        html.Div(
+                                                   dash_table.DataTable(id='table-summary',
+                                                                        columns=[
+                                                                            {"name": i, "id": i} for i in (df_sum)]
+                                                                       )
+                                                 ),
+                                                 className="five columns", style={'margin-top':'20','margin-right':'10'}),
+
+
+                    ],className="row"),
 )
 
 @app.callback(Output('table-filtering', "data"),
@@ -69,20 +79,16 @@ def update_graph(pagination_settings, filtering_settings):
         (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
     ].to_dict('rows')
 
-@app.callback(Output('table-summary', 'children'), [Input('summary_dropdown', 'value')])
+@app.callback(Output('table-summary', 'data'), [Input('summary_dropdown', 'value')])
 def update_table(value):
+    df_stats = df
     if value == 'corr':
-        dff = df.corr()
-        return generate_table(dff)
+        return df_stats.corr()
     elif value == 'null':
-        dff = pd.DataFrame(df.isna().sum()/len(df),index = df.columns)
-        return generate_table(dff)
+        return pd.DataFrame(df_stats.isna().sum()/len(df_stats),index = df_stats.columns)
     elif value == 'unique':
-        dff = pd.DataFrame(df.columns.unique(),index = df.columns)
-        return generate_table(dff)
+        return pd.DataFrame(df_stats.columns.unique(),index = df_stats.columns)
     elif value =='stats':
-        dff = df.info()
-        return generate_table(dff)
+        return df_stats.info()
     else:
-        dff = df.corr()
-        return generate_table(dff)
+        return pd.DataFrame(df_stats.columns.unique(),index = df_stats.columns)

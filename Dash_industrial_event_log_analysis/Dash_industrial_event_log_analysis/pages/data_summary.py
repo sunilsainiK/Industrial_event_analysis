@@ -41,7 +41,7 @@ data_summary_layout = html.Div([html.H1(children='Industrial Event Log Analysis'
                                              dcc.Tab(id='Data', label='Data', value='Data_value'),
                                              dcc.Tab(id='EDA', label='EDA', value='EDA_value'),
                                              dcc.Tab(id='Event_value', label='Event Episode Classification', value='Event_value'),
-                                             dcc.Tab(id='sentimental_value', label='Sentimental Analysis', value='sentimental_value')
+                                             dcc.Tab(id='Sentimental_value', label='Sentimental Analysis', value='sentimental_value')
                                             ]),
                                                html.Div(id='tabs-content')
 
