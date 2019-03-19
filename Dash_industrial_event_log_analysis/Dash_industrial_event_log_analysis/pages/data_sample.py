@@ -5,12 +5,16 @@ from app import app
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import plotly.graph_objs as go
+import plotly.plotly as py
+from plotly.tools import mpl_to_plotly
 
 
 
-df = pd.read_csv('df_raw')
+df = pd.read_csv('C:/Users/DESUSAI/Desktop/Thesis Exposure/Trivago_Challenge/Trivago_Challenge/train_set.csv')
 
 df_sum = df.columns.unique()
+
 PAGE_SIZE = 5
 
 
@@ -34,21 +38,21 @@ data_raw_sample = html.Div(
                                                className="five columns",style={'margin-top':'20', 'margin-left':'10'}
                                             ),
 
-                                        html.Div(dcc.Dropdown(id='summary_dropdown',value='dropdownvalue',
+                                        html.Div([html.Div(dcc.Dropdown(id='summary_dropdown',value='dropdownvalue',
                                                     options=[
                                                                 {'label': 'correlations', 'value': 'corr'},
                                                                 {'label': 'null_values', 'value': 'null'},
                                                                 {'label': 'unique_values', 'value': 'unique'},
-                                                                {'label': 'stats', 'value': 'stats'}
+                                                                {'label': 'distribution', 'value': 'stats'}
                                                             ],
-                                                    ),
+                                                    ),className="five columns", style={'margin-top':'20','margin-left':'20'}),
                                         html.Div(
-                                                   dash_table.DataTable(id='table-summary',
-                                                                        columns=[
-                                                                            {"name": i, "id": i} for i in (df_sum)]
-                                                                       )
+                                                  dcc.Graph(id='table-summary'),
+                                                  className="five columns", style={'margin-top':'20','margin-left':'20'})
+                                                  ],
+                                                  className="row",
                                                  ),
-                                                 className="five columns", style={'margin-top':'20','margin-right':'10'}),
+
 
 
                     ],className="row"),
@@ -79,16 +83,80 @@ def update_graph(pagination_settings, filtering_settings):
         (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
     ].to_dict('rows')
 
-@app.callback(Output('table-summary', 'data'), [Input('summary_dropdown', 'value')])
+@app.callback(Output('table-summary', 'figure'), [Input('summary_dropdown', 'value')])
 def update_table(value):
-    df_stats = df
+    df_graph = df
     if value == 'corr':
-        return df_stats.corr()
+        fig = corr(df_graph)
+        return fig
     elif value == 'null':
-        return pd.DataFrame(df_stats.isna().sum()/len(df_stats),index = df_stats.columns)
+        fig = bar(df_graph)
+        return fig
     elif value == 'unique':
-        return pd.DataFrame(df_stats.columns.unique(),index = df_stats.columns)
+        fig = uni_df(df)
+        return fig
     elif value =='stats':
-        return df_stats.info()
+        fig = distri(df)
+        return fig
     else:
-        return pd.DataFrame(df_stats.columns.unique(),index = df_stats.columns)
+        fig = corr(df_graph)
+        return fig
+
+
+
+
+
+def corr(df):
+    ht=df.corr().values
+
+    trace = dict(type="heatmap",z=ht,x=df.columns, y=df.columns)
+    layout = dict(
+        margin=dict(t=25, l=210, b=85),
+            )
+    return go.Figure(data=[trace], layout=layout)
+
+
+def bar(df):
+    trace =  [
+    go.Bar(
+        x=df.columns,
+        y=((df.isna().sum()/len(df))*100)
+    )]
+    layout = dict(
+        margin=dict(t=25, l=210, b=85, pad=4),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+    )
+    return go.Figure(data=trace, layout=layout)
+
+
+
+def uni_df(df):
+    trace =  [
+    go.Bar(
+        x=df.columns,
+        y=df.nunique()
+    )]
+    layout = dict(
+        margin=dict(t=25, l=210, b=85, pad=4),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+    )
+    return go.Figure(data=trace, layout=layout)
+
+
+
+
+def distri(df):
+    ht=df.columns.values
+    trace =  [
+    go.Box(
+        y = ht, boxpoints='outliers'
+
+    )]
+    layout = dict(
+        margin=dict(t=25, l=210, b=85),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+    )
+    return go.Figure(data=trace, layout=layout)

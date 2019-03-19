@@ -62,4 +62,4 @@ def render_content(tab):
     elif tab == 'sentimental_value':
        return sentimental_info.layout
     else:
-        return EDAinfo.layout
+        return data_sample.data_raw_sample
