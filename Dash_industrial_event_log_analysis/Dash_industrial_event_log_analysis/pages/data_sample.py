@@ -6,8 +6,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
+
 import plotly.plotly as py
-from plotly.tools import mpl_to_plotly
+from plotly import figure_factory as FF
 
 
 
@@ -43,7 +44,8 @@ data_raw_sample = html.Div(
                                                                 {'label': 'correlations', 'value': 'corr'},
                                                                 {'label': 'null_values', 'value': 'null'},
                                                                 {'label': 'unique_values', 'value': 'unique'},
-                                                                {'label': 'distribution', 'value': 'stats'}
+                                                                {'label': 'distribution', 'value': 'dist'},
+                                                                {'label': 'stats', 'value': 'stats'}
                                                             ],
                                                     ),className="five columns", style={'margin-top':'20','margin-left':'20'}),
                                         html.Div(
@@ -95,8 +97,11 @@ def update_table(value):
     elif value == 'unique':
         fig = uni_df(df)
         return fig
-    elif value =='stats':
+    elif value =='dist':
         fig = distri(df)
+        return fig
+    elif value == 'stats':
+        fig = stats(df)
         return fig
     else:
         fig = corr(df_graph)
@@ -120,7 +125,7 @@ def bar(df):
     trace =  [
     go.Bar(
         x=df.columns,
-        y=((df.isna().sum()/len(df))*100)
+        y=((df.isna().sum()/len(df))*100), name='Null Values'
     )]
     layout = dict(
         margin=dict(t=25, l=210, b=85, pad=4),
@@ -135,7 +140,7 @@ def uni_df(df):
     trace =  [
     go.Bar(
         x=df.columns,
-        y=df.nunique()
+        y=df.nunique(), name='Unique Values'
     )]
     layout = dict(
         margin=dict(t=25, l=210, b=85, pad=4),
@@ -148,15 +153,28 @@ def uni_df(df):
 
 
 def distri(df):
-    ht=df.columns.values
-    trace =  [
-    go.Box(
-        y = ht, boxpoints='outliers'
+    ht = []
+    box_df=df.drop(df.columns[0], axis=1)
+    for col in box_df.columns:
+        ht.append(go.Box(y=box_df[col], name=col, showlegend=False))
+    ht.append(go.Scatter(x =box_df.columns, y =box_df.mean(), mode='lines', name='mean'))
 
-    )]
+
     layout = dict(
         margin=dict(t=25, l=210, b=85),
         paper_bgcolor="white",
         plot_bgcolor="white",
     )
-    return go.Figure(data=trace, layout=layout)
+    return go.Figure(data=ht, layout=layout)
+
+def stats(df):
+    df = df.loc[:,['hotel_id','city_id', 'n_review']]
+    stats=pd.DataFrame()
+    stats["mean"]=df.mean()
+    stats["Std.Dev"]=df.std()
+    stats["Var"]= df.var()
+    ht = stats.T
+    ht = ht.reset_index()
+    table = FF.create_table(ht.round(3))
+
+    return go.Figure(data=table)
