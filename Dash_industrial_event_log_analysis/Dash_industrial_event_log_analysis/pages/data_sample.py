@@ -12,7 +12,7 @@ from plotly import figure_factory as FF
 
 
 
-df = pd.read_csv('C:/Users/DESUSAI/Desktop/Thesis Exposure/Trivago_Challenge/Trivago_Challenge/train_set.csv')
+df = pd.read_csv('C:/PCK/MC_040_R05.csv')
 
 df_sum = df.columns.unique()
 
@@ -107,10 +107,6 @@ def update_table(value):
         fig = corr(df_graph)
         return fig
 
-
-
-
-
 def corr(df):
     ht=df.corr().values
 
@@ -150,8 +146,6 @@ def uni_df(df):
     return go.Figure(data=trace, layout=layout)
 
 
-
-
 def distri(df):
     ht = []
     box_df=df.drop(df.columns[0], axis=1)
@@ -167,14 +161,12 @@ def distri(df):
     )
     return go.Figure(data=ht, layout=layout)
 
-def stats(df):
-    df = df.loc[:,['hotel_id','city_id', 'n_review']]
+def stats(df):    
     stats=pd.DataFrame()
     stats["mean"]=df.mean()
     stats["Std.Dev"]=df.std()
     stats["Var"]= df.var()
     ht = stats.T
     ht = ht.reset_index()
-    table = FF.create_table(ht.round(3))
-
+    table = FF.create_table(ht)
     return go.Figure(data=table)

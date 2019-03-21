@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for,request, jsonify
+from flask import Flask,render_template,url_for,request, jsonify, send_from_directory
 from flask_restful import Resource, Api
 import pandas as pd
 import sys
@@ -19,7 +19,8 @@ from sqlalchemy import text
 import psycopg2
 import io
 import os
-from db_model import raw_data
+#from Algo import EDA, EDA_Naive_Bayes
+
 from os.path import basename
 app = Flask(__name__)
 
@@ -38,6 +39,29 @@ def insert_raw_data(data, user):
     db.session.commit()
 
 
+@app.route('/Algo_info', methods=["GET"])
+def Algo_description_page():
+    folder = request.args.get('folder')
+    print(folder)
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if folder == name:
+                file_path = os.path.join(root, name)
+                print(file_path)
+                for r, d, f in os.walk(file_path, topdown=False):
+                    for file in f:
+                        if file.endswith(".html"):
+                            Algo_content_info = file
+                            return send_from_directory(file_path, Algo_content_info)
+
+
+
+
+
+
+
+
 
 @app.route('/data_summary', methods=["POST"])
 def data_summary():
@@ -46,9 +70,7 @@ def data_summary():
          json.dump(data, f)
     jdf = open('data_json')
     df_json = json.load(jdf)
-    insert_raw_data(df_json,'sunil')
     df = pd.DataFrame(eval(df_json ))
-
     df.to_csv('df_raw',index=False)
     df_1 = pd.read_csv('df_raw')
     sum_df_1 = raw_data_summary(df_1)
@@ -56,15 +78,12 @@ def data_summary():
 
 def raw_data_summary(dd_raw):
     raw_summary = dd_raw.count()
-    print(raw_summary)
     return raw_summary
 
 @app.route('/files_name', methods=["GET"])
 def dirname():
     dir = os.path.dirname(os.path.realpath(__file__))
-
     directory_list = list()
-    print(dir)
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in dirs:
             directory_list.append(os.path.join(root, name))
