@@ -10,6 +10,9 @@ from pages import data_summary
 from pages import files_page
 from pages import db_page
 from pages import Home_Page
+from pages import Preprocess
+from pages import Login
+
 import requests
 
 
@@ -28,8 +31,10 @@ def display_page(pathname):
         return db_page.db_page_layout
     elif pathname =='/data_summary':
         return data_summary.data_summary_layout
+    elif pathname =='/Preprocess':
+        return Preprocess.layout
     else:
-        return Home_Page.HomePage_layout
+        return Login.layout
 
 
 if __name__ == '__main__':

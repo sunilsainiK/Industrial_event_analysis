@@ -13,8 +13,7 @@ db_page_layout =  html.Div(
                                                                                    #'background-color':'DodgerBlue',
                                                                                    'text-align':'center'                                                                                  }
                  ),
-                 html.Div([html.H2(children='Database',style={
-                                                                             'padding-left': '2.0%',
+                 html.Div([html.H2(children='Database',style={                                                                       'padding-left': '2.0%',
                                                                              'padding-right': '2.0%',
                                                                               'margin-top':'2%',
 

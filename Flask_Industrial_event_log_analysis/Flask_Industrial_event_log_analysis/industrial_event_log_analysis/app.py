@@ -58,9 +58,25 @@ def Algo_description_page():
 
 
 
-
-
-
+@app.route('/preprocess', methods=["GET"])
+def prepropackage():
+    info = request.args.get('prepackage')
+    print(info)
+    prepropacklist = ''
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if info == name:
+                print(name)
+                file_path = os.path.join(root, name)
+                print(file_path)
+                with os.scandir(file_path) as entries:
+                    for entry in entries:
+                        if entry.is_file():
+                            print(entry.name)
+                            prepropacklist+=','+os.path.splitext(entry.name)[0]
+                    print(prepropacklist)
+                    return prepropacklist
 
 
 @app.route('/data_summary', methods=["POST"])

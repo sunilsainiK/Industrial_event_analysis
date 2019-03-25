@@ -12,7 +12,7 @@ from plotly import figure_factory as FF
 
 
 
-df = pd.read_csv('C:/PCK/MC_040_R05.csv')
+df = pd.read_csv('df_raw')
 
 df_sum = df.columns.unique()
 
@@ -111,9 +111,7 @@ def corr(df):
     ht=df.corr().values
 
     trace = dict(type="heatmap",z=ht,x=df.columns, y=df.columns)
-    layout = dict(
-        margin=dict(t=25, l=210, b=85),
-            )
+    layout = dict(margin=dict(t=25, l=210, b=85),)
     return go.Figure(data=[trace], layout=layout)
 
 
@@ -161,7 +159,7 @@ def distri(df):
     )
     return go.Figure(data=ht, layout=layout)
 
-def stats(df):    
+def stats(df):
     stats=pd.DataFrame()
     stats["mean"]=df.mean()
     stats["Std.Dev"]=df.std()
