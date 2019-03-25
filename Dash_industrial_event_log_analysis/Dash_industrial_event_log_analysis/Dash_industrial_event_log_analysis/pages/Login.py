@@ -96,6 +96,14 @@ def modal():
         style={"display": "none"},
 )
 
+
+
+def filter_table():
+    return
+
+
+
+
 layout = [
 
 html.Div(
@@ -128,7 +136,7 @@ html.Div(
                         {"label": "Project_3", "value": "project-th"},
                         {"label": "Project_4", "value": "project-fo"},
                     ],
-                    value="all",
+                    value="project-f",
                     clearable=False,
                 ),
                 className="two columns",
@@ -156,7 +164,12 @@ html.Div(
         style={"marginBottom": "10"},
     ),
 modal(),
+filter_table(),
 ]
+
+
+
+
 
 @app.callback(
     Output("new_project", "n_clicks"),
