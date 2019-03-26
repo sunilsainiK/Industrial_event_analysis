@@ -1,11 +1,13 @@
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 from app import app
+import pandas as pd
 
 
 
-
+df = pd.read_csv('df_raw')
 
 def modal():
     return html.Div(
@@ -98,9 +100,38 @@ def modal():
 
 
 
-def filter_table():
-    return
+def filter_table(df):
+    return html.Div([ html.Div(
+         dash_table.DataTable(
+                                 id='table-project',
+                                 columns=[
+                                     {"name": i, "id": i} for i in (df.columns)
+                                 ],
 
+
+
+                                 selected_rows=[{'backgroundColor': '#3D9970',
+                                         'color': 'white'}],
+                                 style_header={'fontWeight': 'bold'},
+                                 pagination_settings={
+                                     'current_page': 0,
+                                     'page_size': 5
+                                 },
+                                 pagination_mode='be',
+                                 row_selectable="multi",
+                                 editable=True,
+                                 filtering='be',
+                                 filtering_settings='',style_table={'overflowX': 'scroll'}
+                             ),
+                        className="five columns",style={'margin-top':'20', 'margin-left':'10'},
+
+                     ),
+
+     html.Button('Merge Selected Data', id='editing-rows-button',className="button button--primary",style={'text-align':'right','margin-left':'-12%','margin-top':'14%',"background": "#119DFF",
+     "border": "1px solid #119DFF","color": "white"}, n_clicks=0),
+     html.Button('Prepare Data', id='prepare-data-button',className="button button--primary",style={"background": "#119DFF",'margin-left':'-22%',
+     "border": "1px solid #119DFF","color": "white"}),
+ ])
 
 
 
@@ -141,7 +172,8 @@ html.Div(
                 ),
                 className="two columns",
             ),
-
+           html.A(html.Button('Add Raw data',id='n-btn',className="button button--primary",style={'text-align':'right','margin-left':'14%',"background": "#119DFF",
+           "border": "1px solid #119DFF","color": "white"}),href='Home_Page'),
             # add button
             html.Div(
                 html.Span(
@@ -162,13 +194,13 @@ html.Div(
         ],
         className="row",
         style={"marginBottom": "10"},
+
     ),
+
 modal(),
-filter_table(),
+filter_table(df),
+
 ]
-
-
-
 
 
 @app.callback(
@@ -178,11 +210,62 @@ filter_table(),
 def close_modal_callback(n, n2):
     return 0
 
-
-
 @app.callback(Output("project_modal", "style"), [Input("new_project", "n_clicks")])
 def display_leads_modal_callback(n):
     print(n)
     if n > 0:
         return {"display": "block"}
     return {"display": "none"}
+
+
+@app.callback(Output('table-project', "data"),
+             [Input('table-project', "pagination_settings"),
+             Input('table-project', "filtering_settings")])
+def update_graph(pagination_settings, filtering_settings):
+    filtering_expressions = filtering_settings.split(' && ')
+    dff = df
+    for filter in filtering_expressions:
+        if ' eq ' in filter:
+            col_name = filter.split(' eq ')[0]
+            filter_value = filter.split(' eq ')[1]
+            dff = dff.loc[dff[col_name] == filter_value]
+        if ' > ' in filter:
+            col_name = filter.split(' > ')[0]
+            filter_value = float(filter.split(' > ')[1])
+            dff = dff.loc[dff[col_name] > filter_value]
+        if ' < ' in filter:
+            col_name = filter.split(' < ')[0]
+            filter_value = float(filter.split(' < ')[1])
+            dff = dff.loc[dff[col_name] < filter_value]
+
+    return dff.iloc[
+        pagination_settings['current_page']*pagination_settings['page_size']:
+        (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
+    ].to_dict('rows')
+
+
+
+#@app.callback(
+#    Output('adding-rows-table', 'data'),
+#    [Input('editing-rows-button', 'n_clicks')],
+#    [State('adding-rows-table', 'data'),
+#     State('adding-rows-table', 'columns')])
+#def add_row(n_clicks, rows, columns):
+#    if n_clicks > 0:
+#        rows.append({c['id']: '' for c in columns})
+#    return rows
+
+
+
+#def filter_data(selected_row_indices):
+#        dff = df.iloc[selected_row_indices]
+#        return dff
+
+#@app.callback(
+#    Output('table-project', 'style'),
+#    [Input('table-project', 'selected_row_indices')])
+#def update_style(selected_row_indices):
+#    dff = filter_data(selected_row_indices)
+#    print('hi')
+#    return { 'backgroundColor': '#3D9970',
+#            'color': 'white'}
