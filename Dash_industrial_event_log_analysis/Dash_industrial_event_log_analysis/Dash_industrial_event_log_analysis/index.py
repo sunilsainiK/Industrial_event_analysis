@@ -33,6 +33,8 @@ def display_page(pathname):
         return data_summary.data_summary_layout
     elif pathname =='/Preprocess':
         return Preprocess.layout
+    elif pathname =='/Home':
+        return Home_Page.HomePage_layout
     else:
         return Login.layout
 

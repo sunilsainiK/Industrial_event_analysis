@@ -129,8 +129,8 @@ def filter_table(df):
 
      html.Button('Merge Selected Data', id='editing-rows-button',className="button button--primary",style={'text-align':'right','margin-left':'-12%','margin-top':'14%',"background": "#119DFF",
      "border": "1px solid #119DFF","color": "white"}, n_clicks=0),
-     html.Button('Prepare Data', id='prepare-data-button',className="button button--primary",style={"background": "#119DFF",'margin-left':'-22%',
-     "border": "1px solid #119DFF","color": "white"}),
+     html.A(html.Button('Prepare Data', id='prepare-data-button',className="button button--primary",style={"background": "#119DFF",'margin-left':'-22%',
+     "border": "1px solid #119DFF","color": "white"}),href='/Preprocess'),
  ])
 
 
@@ -173,7 +173,7 @@ html.Div(
                 className="two columns",
             ),
            html.A(html.Button('Add Raw data',id='n-btn',className="button button--primary",style={'text-align':'right','margin-left':'14%',"background": "#119DFF",
-           "border": "1px solid #119DFF","color": "white"}),href='Home_Page'),
+           "border": "1px solid #119DFF","color": "white"}),href='/Home'),
             # add button
             html.Div(
                 html.Span(
