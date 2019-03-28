@@ -1,4 +1,4 @@
-from flask_restful import Resource
+
 
 def getEventProb(events):
     # dropping the bucket because probabilty of event occuring in this data frame is on day basis

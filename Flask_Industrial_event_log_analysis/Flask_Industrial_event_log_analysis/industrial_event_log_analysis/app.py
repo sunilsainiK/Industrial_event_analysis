@@ -1,11 +1,10 @@
-from flask import Flask,render_template,url_for,request, jsonify, send_from_directory
+from flask import Flask,render_template,url_for,request, jsonify, send_from_directory, session
 from flask_restful import Resource, Api
 import pandas as pd
 import sys
 from datetime import datetime
 from sqlalchemy import create_engine
 import os
-from flask_sqlalchemy import SQLAlchemy
 import getpass
 import re
 import math
@@ -15,19 +14,27 @@ import urllib
 import chardet
 from pandas.io.json import json_normalize
 import requests
-from sqlalchemy import text
-import psycopg2
+from flask.ext.session import Session
 import io
 import os
-#from Algo import EDA, EDA_Naive_Bayes
 
+#from Algo import EDA, EDA_Naive_Bayes
+from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 app = Flask(__name__)
 
+#creation of the tables
+
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Industrial_Event_log_Analysis"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
 
 db = SQLAlchemy(app)
+app.secret_key =os.urandom(24)
+
+from models import user, feedback, prediction, project, prepared_data, raw_data, reviwer, sample_data, trained_model_result
+
+
 
 
 
@@ -37,6 +44,13 @@ def insert_raw_data(data, user):
     new_data = raw_data(newUser, rawdata)
     db.session.add(new_data)
     db.session.commit()
+
+
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+    if request.method =='POST':
+
 
 
 @app.route('/Algo_info', methods=["GET"])
@@ -104,6 +118,7 @@ def dirname():
         for name in dirs:
             directory_list.append(os.path.join(root, name))
     return jsonify(directory_list)
-if __name__ == '__main__':
 
+
+if __name__ == '__main__':
     app.run()
