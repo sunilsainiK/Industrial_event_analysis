@@ -12,18 +12,18 @@ import numpy as np
 import json
 import urllib
 import chardet
+import importlib
 from pandas.io.json import json_normalize
 import requests
-from flask.ext.session import Session
+from sqlalchemy.orm import sessionmaker
+from models import *
 import io
 import os
-
-#from Algo import EDA, EDA_Naive_Bayes
+import PreProcessing
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 app = Flask(__name__)
 
-#creation of the tables
 
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -31,11 +31,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5
 
 db = SQLAlchemy(app)
 app.secret_key =os.urandom(24)
-
-from models import user, feedback, prediction, project, prepared_data, raw_data, reviwer, sample_data, trained_model_result
-
-
-
 
 
 def insert_raw_data(data, user):
@@ -50,47 +45,65 @@ def insert_raw_data(data, user):
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method =='POST':
+       project = request.args.get('project')
+       user = request.args.get('user')
+       new_project = project(user,project)
+       db.session.add(new_project)
+       db.session.commit()
+    if request.method == 'GET':
+        project.query.all()
+        project=project.query.filter_by('user').all()
+    return jsonify(project)
 
 
-
+#Algo Details
 @app.route('/Algo_info', methods=["GET"])
 def Algo_description_page():
     folder = request.args.get('folder')
-    print(folder)
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in dirs:
             if folder == name:
                 file_path = os.path.join(root, name)
-                print(file_path)
                 for r, d, f in os.walk(file_path, topdown=False):
                     for file in f:
                         if file.endswith(".html"):
                             Algo_content_info = file
                             return send_from_directory(file_path, Algo_content_info)
 
+#Preprossing Information
+@app.route('/preprocess_Info', methods=["GET"])
+def pre_info():
+    prep_info = request.args.get('prestep_info')
+    prep_info=prep_info+'.html'
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if name == 'PreProcessing':
+                file_path = os.path.join(root, name)
+                for r, d, f in os.walk(file_path, topdown=False):
+                    for file in f:
+                        if file==prep_info:
+                            Prep_content_info = file
+                            return send_from_directory(file_path, Prep_content_info)
 
-
-
+#preprocessing
 @app.route('/preprocess', methods=["GET"])
 def prepropackage():
     info = request.args.get('prepackage')
-    print(info)
     prepropacklist = ''
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in dirs:
             if info == name:
-                print(name)
                 file_path = os.path.join(root, name)
-                print(file_path)
                 with os.scandir(file_path) as entries:
                     for entry in entries:
                         if entry.is_file():
-                            print(entry.name)
-                            prepropacklist+=','+os.path.splitext(entry.name)[0]
-                    print(prepropacklist)
+                            if not entry.name.startswith('_'):
+                                prepropacklist+=','+os.path.splitext(entry.name)[0]
                     return prepropacklist
+
 
 
 @app.route('/data_summary', methods=["POST"])

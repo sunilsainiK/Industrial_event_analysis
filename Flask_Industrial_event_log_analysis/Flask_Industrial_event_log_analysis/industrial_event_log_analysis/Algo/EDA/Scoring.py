@@ -6,9 +6,9 @@ import pandas as pd
 
 
 def score(self,df,robot,value1,query,engine,postGressDataFrame,):
-    #events_scoring = pd.read_pickle("events_trainings.pck")
+     events_scoring = pd.read_pickle("events_trainings.pck")
     events_scoring = df
-    #daily_prob = pd.read_pickle("daily_prob.pck")
+    daily_prob = pd.read_pickle("daily_prob.pck")
     #daily_prob = Training.getEventProb()
     #aposteriori = pd.read_pickle("aposteriori.pck")
     events_scoring = events_scoring.drop(['counter'], axis=1)
