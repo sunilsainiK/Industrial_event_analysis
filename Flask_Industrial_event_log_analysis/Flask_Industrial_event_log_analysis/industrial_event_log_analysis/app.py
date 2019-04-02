@@ -19,7 +19,7 @@ from sqlalchemy.orm import sessionmaker
 from models import *
 import io
 import os
-import PreProcessing
+from  PreProcessing import *
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 app = Flask(__name__)
@@ -71,6 +71,7 @@ def Algo_description_page():
                             Algo_content_info = file
                             return send_from_directory(file_path, Algo_content_info)
 
+
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])
 def pre_info():
@@ -83,9 +84,11 @@ def pre_info():
                 file_path = os.path.join(root, name)
                 for r, d, f in os.walk(file_path, topdown=False):
                     for file in f:
-                        if file==prep_info:
-                            Prep_content_info = file
-                            return send_from_directory(file_path, Prep_content_info)
+                        if file.endswith(".html"):
+                            if file==prep_info:
+                                Prep_content_info = file
+                                return send_from_directory(file_path, Prep_content_info)
+
 
 #preprocessing
 @app.route('/preprocess', methods=["GET"])
@@ -101,7 +104,8 @@ def prepropackage():
                     for entry in entries:
                         if entry.is_file():
                             if not entry.name.startswith('_'):
-                                prepropacklist+=','+os.path.splitext(entry.name)[0]
+                                if entry.name.endswith('.py'):
+                                    prepropacklist+=','+os.path.splitext(entry.name)[0]
                     return prepropacklist
 
 
