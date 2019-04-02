@@ -19,12 +19,13 @@ from sqlalchemy.orm import sessionmaker
 from models import *
 import io
 import os
+import subprocess
 from  PreProcessing import *
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 app = Flask(__name__)
 
-
+Pre
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
@@ -54,6 +55,12 @@ def login():
         project.query.all()
         project=project.query.filter_by('user').all()
     return jsonify(project)
+
+
+
+
+
+
 
 
 #Algo Details
@@ -88,6 +95,27 @@ def pre_info():
                             if file==prep_info:
                                 Prep_content_info = file
                                 return send_from_directory(file_path, Prep_content_info)
+
+
+@app.route('/run_preprocess', methods=["GET"])
+def run_pre():
+    prep_run = request.args.get('prestep_run')
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if name == 'PreProcessing':
+                file_path = os.path.join(root, name)
+                with os.scandir(file_path) as entries:
+                    for entry in entries:
+                        if entry.is_file():
+                            if not entry.name.startswith('_'):
+                                if entry.name.endswith('.py'):
+                                    if entry.name[0]== prep_run:
+                                        prep_result = subprocess.call(entry)
+                                        return(prep_result)
+
+
+
 
 
 #preprocessing
