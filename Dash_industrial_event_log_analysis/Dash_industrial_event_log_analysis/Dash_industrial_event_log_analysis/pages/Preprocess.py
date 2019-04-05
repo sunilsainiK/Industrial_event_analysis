@@ -44,6 +44,15 @@ def info_prep(list):
                                                                                           className="row"))
     return btn
 
+
+
+def info(list):
+    for i in range (len(list)):
+        val=[]
+        if not  list[i]=='':
+           val.append(list[i])
+    return  val
+
 layout = html.Div(
        html.Div([
                 html.H1(children='Industrial Event Log Analysis',style={
@@ -69,7 +78,7 @@ layout = html.Div(
                                          style={'width':'60%','margin-top':'2%','margin-bottom':'2%','height':'400px','margin-left':'2%'}),
                                          html.Div(info_prep(list),style={'margin-bottom':'2%','height':'400px','margin-top':'-112%','float':'right'}),
                                          ],style={'float':'left','width':'20%','border':'solid','overflowY':'scroll','height':'500px'}),
-            html.Div(id='Info_pre'),
+            html.Div(id=info(list)),
 
 ]),
 
@@ -120,10 +129,11 @@ layout = html.Div(
 
 )
 
-@app.callback(Output('Info_pre','children'),
-      [Input( value ,'n_clicks')],
-      [State('{j}','title')])
-
-def inp(n_clicks, title):
-    if n_clicks > 0:
-       return html.Div('hi')
+for val in range(len(list)):
+    @app.callback(Output('{}'.format(list[val]),'children'),
+      [Input('{}'.format(list[val]),'n_clicks')],
+      [State('{}'.format(list[val]),'title')])
+    def inp(n_clicks, title):
+        print(title)
+        if n_clicks > 0:
+           return html.Div('hi')
