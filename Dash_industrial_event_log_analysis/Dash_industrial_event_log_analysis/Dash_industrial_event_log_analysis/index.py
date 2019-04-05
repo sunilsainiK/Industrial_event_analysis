@@ -12,6 +12,7 @@ from pages import db_page
 from pages import Home_Page
 from pages import Preprocess
 from pages import Login
+from pages import Log_file
 
 import requests
 
@@ -35,8 +36,10 @@ def display_page(pathname):
         return Preprocess.layout
     elif pathname =='/Home':
         return Home_Page.HomePage_layout
-    else:
+    elif pathname == '/login':
         return Login.layout
+    else:
+        return Log_file.layout
 
 
 if __name__ == '__main__':

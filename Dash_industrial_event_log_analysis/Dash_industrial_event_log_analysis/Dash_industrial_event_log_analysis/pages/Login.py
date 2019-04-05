@@ -101,15 +101,13 @@ def modal():
 
 
 def filter_table(df):
-    return html.Div([ html.Div(
+    return html.Div([
+     html.Div(
          dash_table.DataTable(
                                  id='table-project',
                                  columns=[
                                      {"name": i, "id": i} for i in (df.columns)
                                  ],
-
-
-
                                  selected_rows=[{'backgroundColor': '#3D9970',
                                          'color': 'white'}],
                                  style_header={'fontWeight': 'bold'},
@@ -123,12 +121,12 @@ def filter_table(df):
                                  filtering='be',
                                  filtering_settings='',style_table={'overflowX': 'scroll'}
                              ),
-                        className="five columns",style={'margin-top':'20', 'margin-left':'10'},
+                        className="five columns",style={'margin-top':'20', 'margin-left':'10','width':'40%'},
 
                      ),
 
      html.Button('Merge Selected Data', id='editing-rows-button',className="button button--primary",style=
-     {'text-align':'right','margin-left':'-12%','margin-top':'14%',"background": "#119DFF",
+     {'text-align':'right','margin-left':'33%','margin-top':'0%',"background": "#119DFF",
      "border": "1px solid #119DFF","color": "white"}, n_clicks=0),
      html.A(html.Button('Prepare Data', id='prepare-data-button',className="button button--primary",style=
      {"background": "#119DFF",'margin-left':'-24%',
@@ -174,7 +172,7 @@ html.Div(
                 ),
                 className="two columns",
             ),
-           html.A(html.Button('Add Raw data',id='n-btn',className="button button--primary",style={'text-align':'right','margin-left':'14%',"background": "#119DFF",
+           html.A(html.Button('Add Raw data',id='n-btn',className="button button--primary",style={'text-align':'right','margin-left':'35%',"background": "#119DFF",
            "border": "1px solid #119DFF","color": "white"}),href='/Home'),
             # add button
             html.Div(

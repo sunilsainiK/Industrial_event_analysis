@@ -13,7 +13,6 @@ import re
 
 
 df = pd.read_csv('df_raw')
-
 prep='prepackage=PreProcessing'
 r  = requests.get("http://127.0.0.1:5000/preprocess",params=prep)
 list =re.split(',',r.text)
@@ -24,13 +23,13 @@ def button_values(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-           btn_values.append(html.Div(html.Button(list[i] ,id='id_0_'+str(i) ,title=value, n_clicks=0, style={'width':'80%',
+
+           btn_values.append(html.Div(html.Button(list[i] ,id='id_0_'+str(i) ,title=value,  style={'width':'80%',
                                                                                    'margin-top':'4%',
                                                                                    'margin-left':'4%',
                                                                                    'margin-bottom':'4%'}),
                                                                                    className="row"))
     return btn_values
-
 
 def info_prep(list):
     i=1
@@ -38,7 +37,11 @@ def info_prep(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-           btn.append(html.Div(html.Button('i' ,id=value ,title=value, n_clicks=0, style={'width':'1%','margin-top':'4%'})))
+           btn.append(html.Div(html.Button('i' ,id=value,title=value,  style={'width':'1%',
+                                                                                          'margin-top':'0.2%',
+                                                                                          'margin-bottom':'95%'}),style={'margin-top':'4%',
+                                                                                                                        'margin-bottom':'4%'},
+                                                                                          className="row"))
     return btn
 
 layout = html.Div(
@@ -50,10 +53,6 @@ layout = html.Div(
                                                                   #'background-color':'DodgerBlue',
                                                                   'text-align':'center'}
                  ),
-
-
-
-
                    html.Div([html.H2(children='Preprocessing',style={
                                                             'padding-left': '2.0%',
                                                             'padding-right': '2.0%',
@@ -62,21 +61,17 @@ layout = html.Div(
                                                              'text-align':'center'
                                                                }),]),
 
-
-
 #Preprocessing lsit box
                html.Div([
                 html.Div(html.H5(children='Preprocess Options', style={'border':'solid','width':'20%','text-align':'center'})),
                         html.Div([
                                 html.Div(html.Div(button_values(list),className="seven columns"),
-                                         style={'width':'85%','margin-top':'2%','margin-bottom':'2%','margin-left':'2%'}),
-                                         html.Div(info_prep(list),style={'margin-bottom':'2%','margin-top':'2%','margin-left':'20%'}),
-                                         ],style={'float':'left','width':'20%','border':'solid','overflowY':'scroll'}),
+                                         style={'width':'60%','margin-top':'2%','margin-bottom':'2%','height':'400px','margin-left':'2%'}),
+                                         html.Div(info_prep(list),style={'margin-bottom':'2%','height':'400px','margin-top':'-112%','float':'right'}),
+                                         ],style={'float':'left','width':'20%','border':'solid','overflowY':'scroll','height':'500px'}),
+            html.Div(id='Info_pre'),
 
 ]),
-
-
-
 
 # Process data
 
@@ -99,7 +94,7 @@ layout = html.Div(
                                                     ],style={'float':'right','width':'30%'}),
                             #Sample data
 
-                            html.Div([html.H5(children='sample raw data',style={'margin-left':'8%','border':'solid','width':'100%','text-align':'center'}),
+                            html.Div([html.H5(children='sample raw data',style={'margin-left':'8%','border':'solid','width':'90%','text-align':'center'}),
                                     html.Div(
                                          dash_table.DataTable(
                                                                  id='table-filtering',
@@ -121,6 +116,14 @@ layout = html.Div(
                                                      ],style={'display':'inline-block','width':'33%'})
 
 
-]),
+    ]),
 
 )
+
+@app.callback(Output('Info_pre','children'),
+      [Input( value ,'n_clicks')],
+      [State('{j}','title')])
+
+def inp(n_clicks, title):
+    if n_clicks > 0:
+       return html.Div('hi')

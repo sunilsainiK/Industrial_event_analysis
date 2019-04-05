@@ -15,6 +15,7 @@ import chardet
 import importlib
 from pandas.io.json import json_normalize
 import requests
+import psycopg2 as pg2
 from sqlalchemy.orm import sessionmaker
 from models import *
 import io
@@ -23,14 +24,22 @@ import subprocess
 from  PreProcessing import *
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.dialects.postgresql import BYTEA
+from sqlalchemy import text
+
 app = Flask(__name__)
 
-Pre
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
 
 db = SQLAlchemy(app)
+conn = pg2.connect(database='Event_Analysis', user='postgres', password='sunil')
+cur = conn.cursor()
+
+
 app.secret_key =os.urandom(24)
 
 
@@ -52,15 +61,14 @@ def login():
        db.session.add(new_project)
        db.session.commit()
     if request.method == 'GET':
-        project.query.all()
-        project=project.query.filter_by('user').all()
-    return jsonify(project)
-
-
-
-
-
-
+       project_name = request.args.get('pr')
+       print(project_name)
+       cur.execute('SELECT * FROM project')
+       project = cur.fetchall()
+       if project=='':
+           project =='table is empty'
+       #project = project.query.filter_by(user_id=project_name).all()
+       return project
 
 
 #Algo Details
@@ -113,10 +121,6 @@ def run_pre():
                                     if entry.name[0]== prep_run:
                                         prep_result = subprocess.call(entry)
                                         return(prep_result)
-
-
-
-
 
 #preprocessing
 @app.route('/preprocess', methods=["GET"])
