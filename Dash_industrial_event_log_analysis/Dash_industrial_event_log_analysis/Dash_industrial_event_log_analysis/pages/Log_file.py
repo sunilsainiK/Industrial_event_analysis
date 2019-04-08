@@ -4,8 +4,6 @@ from dash.dependencies import Input, Output, State
 import requests
 from app import app
 
-
-
 layout = html.Div([
                   html.H1(children='Industrial Event Log Analysis',style={
                                                          'padding-left': '2.0%',

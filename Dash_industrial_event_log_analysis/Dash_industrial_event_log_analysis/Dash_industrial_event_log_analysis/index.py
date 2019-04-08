@@ -13,6 +13,7 @@ from pages import Home_Page
 from pages import Preprocess
 from pages import Login
 from pages import Log_file
+from pages import page_2
 
 import requests
 
@@ -38,6 +39,8 @@ def display_page(pathname):
         return Home_Page.HomePage_layout
     elif pathname == '/login':
         return Login.layout
+    elif pathname =='/test':
+        return page_2.layout
     else:
         return Log_file.layout
 

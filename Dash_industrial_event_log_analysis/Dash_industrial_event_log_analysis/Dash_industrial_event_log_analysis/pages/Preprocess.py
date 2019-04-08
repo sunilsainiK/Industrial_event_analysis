@@ -23,8 +23,7 @@ def button_values(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-
-           btn_values.append(html.Div(html.Button(list[i] ,id='id_0_'+str(i) ,title=value,  style={'width':'80%',
+           btn_values.append(html.Div(html.Button(list[i] ,id='id_0_'+str(i),n_clicks=0,title=value,style={'width':'80%',
                                                                                    'margin-top':'4%',
                                                                                    'margin-left':'4%',
                                                                                    'margin-bottom':'4%'}),
@@ -37,20 +36,21 @@ def info_prep(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-           btn.append(html.Div(html.Button('i' ,id=value,title=value,  style={'width':'1%',
+           btn.append(html.Div(html.Button('i' ,id='info'+value,title=value,style={'width':'1%',
                                                                                           'margin-top':'0.2%',
                                                                                           'margin-bottom':'95%'}),style={'margin-top':'4%',
                                                                                                                         'margin-bottom':'4%'},
                                                                                           className="row"))
     return btn
 
-
-
 def info(list):
+    i=1
+    val =[]
     for i in range (len(list)):
-        val=[]
-        if not  list[i]=='':
-           val.append(list[i])
+       if not  list[i]=='':
+           value=list[i]
+           val.append(html.Div(id=value,className="row"))
+
     return  val
 
 layout = html.Div(
@@ -74,66 +74,110 @@ layout = html.Div(
                html.Div([
                 html.Div(html.H5(children='Preprocess Options', style={'border':'solid','width':'20%','text-align':'center'})),
                         html.Div([
+#Preprocesssteps
                                 html.Div(html.Div(button_values(list),className="seven columns"),
                                          style={'width':'60%','margin-top':'2%','margin-bottom':'2%','height':'400px','margin-left':'2%'}),
-                                         html.Div(info_prep(list),style={'margin-bottom':'2%','height':'400px','margin-top':'-112%','float':'right'}),
-                                         ],style={'float':'left','width':'20%','border':'solid','overflowY':'scroll','height':'500px'}),
-            html.Div(id=info(list)),
-
+#infolist Preprocess
+                                         html.Div(html.Div(info_prep(list)),
+                                         style={'margin-bottom':'2%','height':'200px',
+                                         'margin-top':'-112%','float':'right'}),],
+                                style={'float':'left','width':'20%','border':'solid','overflowY':'scroll','height':'500px'}),
+#InfoBox
+             html.Div(info(list),className="seven columns"),
 ]),
+
+
 
 # Process data
 
-                        html.Div([html.H5(children='process data',style={'margin-left':'8%','border':'solid','width':'80%','text-align':'center'}),
-                                html.Div(
-                                     dash_table.DataTable(
-                                                             id='table-filtering',
-                                                             columns=[
-                                                                 {"name": i, "id": i} for i in (df.columns)
-                                                             ],style_header={'fontWeight': 'bold'},
-                                                             pagination_settings={
-                                                                 'current_page': 0,
-                                                                 'page_size': 5
-                                                             },
-                                                             pagination_mode='be',
-                                                             filtering='be',
-                                                             filtering_settings='',style_table={'overflowX': 'scroll'}
-                                                         ),
-                                                       style={'margin-top':'2%', 'margin-left':'8%', 'width':'80%'})
-                                                    ],style={'float':'right','width':'30%'}),
-                            #Sample data
+                html.Div([html.H5(children='process data',style={'margin-left':'8%','border':'solid','width':'80%','text-align':'center'}),
+                        html.Div(
+                             dash_table.DataTable(
+                                                     id='table-filtering',
+                                                     columns=[
+                                                         {"name": i, "id": i} for i in (df.columns)
+                                                     ],style_header={'fontWeight': 'bold'},
+                                                     pagination_settings={
+                                                         'current_page': 0,
+                                                         'page_size': 5
+                                                     },
+                                                     pagination_mode='be',
+                                                     filtering='be',
+                                                     filtering_settings='',style_table={'overflowX': 'scroll'}
+                                                 ),
+                                               style={'margin-top':'2%', 'margin-left':'8%', 'width':'80%'})
+                                            ],style={'float':'right','width':'30%'}),
+                    #Sample data
 
-                            html.Div([html.H5(children='sample raw data',style={'margin-left':'8%','border':'solid','width':'90%','text-align':'center'}),
-                                    html.Div(
-                                         dash_table.DataTable(
-                                                                 id='table-filtering',
-                                                                 columns=[
-                                                                     {"name": i, "id": i} for i in (df.columns)
-                                                                 ],style_header={'fontWeight': 'bold'},
-                                                                 pagination_settings={
-                                                                     'current_page': 0,
-                                                                     'page_size': 5
-                                                                 },
-                                                                 pagination_mode='be',
+                    html.Div([html.H5(children='sample raw data',style={'margin-left':'8%','border':'solid','width':'90%','text-align':'center'}),
+                            html.Div(
+                                 dash_table.DataTable(
+                                                         id='table-filtering',
+                                                         columns=[
+                                                             {"name": i, "id": i} for i in (df.columns)
+                                                         ],style_header={'fontWeight': 'bold'},
+                                                         pagination_settings={
+                                                             'current_page': 0,
+                                                             'page_size': 5
+                                                         },
+                                                         pagination_mode='be',
 
-                                                                 filtering='be',
-                                                                 filtering_settings='',style_table={'overflowX': 'scroll'}
-                                                             ),
+                                                         filtering='be',
+                                                         filtering_settings='',style_table={'overflowX': 'scroll'}
+                                                     ),
 
-                                                        style={'margin-top':'2%', 'margin-left':'8%'}
-                                                        ),
-                                                     ],style={'display':'inline-block','width':'33%'})
+                                                style={'margin-top':'2%', 'margin-left':'8%'}
+                                                ),
+                                             ],style={'display':'inline-block','width':'33%'})
 
 
     ]),
 
 )
 
+
+def generate_output_id(value1):
+    return '{}'.format(value1)
+
+
+def generate_input_id(value1):
+    return 'info{}'.format(value1)
+
+# information box and callback based on list
 for val in range(len(list)):
-    @app.callback(Output('{}'.format(list[val]),'children'),
-      [Input('{}'.format(list[val]),'n_clicks')],
-      [State('{}'.format(list[val]),'title')])
-    def inp(n_clicks, title):
-        print(title)
-        if n_clicks > 0:
-           return html.Div('hi')
+    if not  list[val]=='':
+        @app.callback(Output(generate_output_id(list[val]),'children'),
+        [Input(generate_input_id(list[val]),'n_clicks')],
+        [State(generate_input_id(list[val]),'title')])
+        def inp(n_clicks, title):
+            if not ((n_clicks is None)  or (n_clicks==0)):
+                prpro_info='prestep_info='+title
+                r  = requests.get("http://127.0.0.1:5000/preprocess_Info",params=prpro_info)
+                print(r.text)
+                return html.Div([
+                                html.Iframe(srcDoc=r.text,style={'width':'80%',
+                                'height':'50px','border':'solid'},draggable='yes'),
+                                html.Button('close',id='close_info_panel',style={'border':'solid','marginLeft':'80%'})]
+                                ,style={'border':'solid','height':'200px'})
+
+
+#setting value to zero for closing infobox
+for val in range(len(list)):
+    if not  list[val]=='':
+        @app.callback(Output(generate_input_id(list[val]),'n_clicks'),
+        [Input('close_info_panel','n_clicks')],)
+        def close_info_panel(n):
+            print('panel',n)
+            return 0
+
+
+# controlling box hide and display based on clicks
+for val in range(len(list)):
+    if not  list[val]=='':
+        @app.callback(Output(generate_output_id(list[val]),"style"),
+        [Input(generate_input_id(list[val]),'n_clicks')],)
+        def close_info_div(n):
+            if  n > 0:
+                print('div',n)
+                return {"display": "block"}
+            return  {"display": "none"}

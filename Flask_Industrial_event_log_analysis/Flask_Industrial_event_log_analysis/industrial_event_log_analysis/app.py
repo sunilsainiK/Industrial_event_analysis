@@ -13,6 +13,7 @@ import json
 import urllib
 import chardet
 import importlib
+from importlib import import_module
 from pandas.io.json import json_normalize
 import requests
 import psycopg2 as pg2
@@ -21,23 +22,23 @@ from models import *
 import io
 import os
 import subprocess
-from  PreProcessing import *
+import  PreProcessing
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy import text
-
+from inspect import formatargspec, getfullargspec
 app = Flask(__name__)
 
 
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
+#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+#app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
 
 db = SQLAlchemy(app)
-conn = pg2.connect(database='Event_Analysis', user='postgres', password='sunil')
-cur = conn.cursor()
+#conn = pg2.connect(database='Event_Analysis', user='postgres', password='sunil')
+#cur = conn.cursor()
 
 
 app.secret_key =os.urandom(24)
@@ -87,6 +88,36 @@ def Algo_description_page():
                             return send_from_directory(file_path, Algo_content_info)
 
 
+@app.route('/get_pre_Args', methods=["GET"])
+def algo_args():
+    alg_args = request.args.get('algs')
+    alg = alg_args
+    print(alg)
+    alg_args = alg_args+'.py'
+    print(alg_args)
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if name == 'PreProcessing':
+                print(name)
+                file_path = os.path.join(root, name)
+                with os.scandir(file_path) as entries:
+                    for entry in entries:
+                        if entry.is_file():
+                            if not entry.name.startswith('_'):
+                                if entry.name.endswith('.py'):
+                                    print(entry.name)
+                                    if entry.name== alg_args:
+                                        print(alg_args)
+                                        pkl=os.path.join(file_path,alg_args)
+                                        print(pkl)
+                                        mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
+                                        print(mdl)
+                                        attr_Name=getattr(mdl,alg)
+                                        prep_result = formatargspec(*getfullargspec(attr_Name))
+                                        return prep_result
+
+
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])
 def pre_info():
@@ -104,10 +135,11 @@ def pre_info():
                                 Prep_content_info = file
                                 return send_from_directory(file_path, Prep_content_info)
 
-
+#runpackage
 @app.route('/run_preprocess', methods=["GET"])
 def run_pre():
     prep_run = request.args.get('prestep_run')
+    print(prep_run)
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in dirs:
@@ -119,8 +151,9 @@ def run_pre():
                             if not entry.name.startswith('_'):
                                 if entry.name.endswith('.py'):
                                     if entry.name[0]== prep_run:
+                                        print(prep_run)
                                         prep_result = subprocess.call(entry)
-                                        return(prep_result)
+                    return(prep_result)
 
 #preprocessing
 @app.route('/preprocess', methods=["GET"])
