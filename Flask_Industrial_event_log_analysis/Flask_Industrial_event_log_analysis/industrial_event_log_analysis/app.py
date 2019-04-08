@@ -43,13 +43,7 @@ db = SQLAlchemy(app)
 
 app.secret_key =os.urandom(24)
 
-
-def insert_raw_data(data, user):
-    newUser = user
-    rawdata = data
-    new_data = raw_data(newUser, rawdata)
-    db.session.add(new_data)
-    db.session.commit()
+#def insert_raw_data(data, user):
 
 
 
@@ -58,16 +52,34 @@ def login():
     if request.method =='POST':
        project = request.args.get('project')
        user = request.args.get('user')
-       new_project = project(user,project)
-       db.session.add(new_project)
-       db.session.commit()
+       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432', database='Event_Analysis')
+       print('connected')
+       cur = connection.cursor()
+
+       cur.execute('INSERT INTO project (user_id, project_id)  VALUES(%s,%s)',user,project)
+       print('executed')
+       cur.commit()
+       print('commited')
+       cur.close()
+       connection.close()
+       return 'data is saved'
+
     if request.method == 'GET':
        project_name = request.args.get('pr')
        print(project_name)
+       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432', database='Event_Analysis')
+       print('connected')
+       cur = connection.cursor()
        cur.execute('SELECT * FROM project')
+       print('executed')
        project = cur.fetchall()
-       if project=='':
-           project =='table is empty'
+       print('feteched')
+       print(project)
+       cur.close()
+       connection.close()
+       if not project:
+
+           return (print('table is empty'))
        #project = project.query.filter_by(user_id=project_name).all()
        return project
 
