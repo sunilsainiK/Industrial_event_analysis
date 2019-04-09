@@ -37,50 +37,52 @@ app = Flask(__name__)
 #app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
 
 db = SQLAlchemy(app)
-#conn = pg2.connect(database='Event_Analysis', user='postgres', password='sunil')
-#cur = conn.cursor()
-
 
 app.secret_key =os.urandom(24)
 
-#def insert_raw_data(data, user):
-
-
-
-@app.route('/login', methods=['GET','POST'])
-def login():
+@app.route('/check_project', methods=['GET','POST'])
+def check_project():
     if request.method =='POST':
        project = request.args.get('project')
+       print(project)
        user = request.args.get('user')
-       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432', database='Event_Analysis')
-       print('connected')
+       print(user)
+       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
+       database='Event_Analysis')
        cur = connection.cursor()
-
-       cur.execute('INSERT INTO project (user_id, project_id)  VALUES(%s,%s)',user,project)
-       print('executed')
-       cur.commit()
+       cur.execute('INSERT INTO projects (user_name, project_name)  VALUES(%s,%s)',(user,project))
+       connection.commit()
        print('commited')
        cur.close()
        connection.close()
        return 'data is saved'
 
+
+@app.route('/login', methods=['GET','POST'])
+def login():
     if request.method == 'GET':
-       project_name = request.args.get('pr')
-       print(project_name)
-       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432', database='Event_Analysis')
+       user_name = request.args.get('pr')
+       print(user_name)
+       connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
+       database='Event_Analysis')
        print('connected')
        cur = connection.cursor()
-       cur.execute('SELECT * FROM project')
+       cur.execute('SELECT project_name FROM projects WHERE user_name=%s;', (user_name,))
        print('executed')
        project = cur.fetchall()
        print('feteched')
        print(project)
+       if not project:
+           cur.execute('SELECT user_name FROM users WHERE user_name = %s', (user_name,))
+           user = cur.fetchone()
+           if not user:
+               print(user_name)
+               cur.execute('INSERT INTO users (user_name) VALUES(%s)', (user_name,))
+               connection.commit()
+               print('user inserted')
+
        cur.close()
        connection.close()
-       if not project:
-
-           return (print('table is empty'))
-       #project = project.query.filter_by(user_id=project_name).all()
        return project
 
 
@@ -98,7 +100,6 @@ def Algo_description_page():
                         if file.endswith(".html"):
                             Algo_content_info = file
                             return send_from_directory(file_path, Algo_content_info)
-
 
 @app.route('/get_pre_Args', methods=["GET"])
 def algo_args():
@@ -128,7 +129,6 @@ def algo_args():
                                         attr_Name=getattr(mdl,alg)
                                         prep_result = formatargspec(*getfullargspec(attr_Name))
                                         return prep_result
-
 
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])

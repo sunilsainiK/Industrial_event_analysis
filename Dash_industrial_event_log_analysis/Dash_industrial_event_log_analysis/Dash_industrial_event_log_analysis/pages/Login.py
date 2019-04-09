@@ -4,7 +4,7 @@ import dash_table
 from dash.dependencies import Input, Output, State
 from app import app
 import pandas as pd
-
+import requests
 
 
 df = pd.read_csv('df_raw')
@@ -205,10 +205,17 @@ filter_table(df),
 
 @app.callback(
     Output("new_project", "n_clicks"),
-    [Input("new_project_close", "n_clicks"), Input("submit_new_project", "n_clicks")],
+    [Input("new_project_close", "n_clicks"),
+    Input("submit_new_project", "n_clicks"),
+    Input("new_project_name", "value"),
+    Input("User Name","value")],
 )
-def close_modal_callback(n, n2):
-    return 0
+def close_modal_callback(n, n2,pr_name,Use_name):
+    if not ((n2 is None)  or (n2 == 0)):
+        print('prt',n2)
+        load = 'user='+Use_name+'&project='+pr_name
+        r = requests.post("http://127.0.0.1:5000/check_project",params=load)
+        return 0
 
 @app.callback(Output("project_modal", "style"), [Input("new_project", "n_clicks")])
 def display_leads_modal_callback(n):
