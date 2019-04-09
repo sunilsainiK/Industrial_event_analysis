@@ -72,6 +72,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         global raw_data
         raw_data = pd.read_csv(io.StringIO(data.decode('utf-8')))
         raw_data.to_csv('df_raw',index=False)
-        response = requests.post("http://127.0.0.1:5000/data_summary", json=raw_data.to_json())
+        load='use=sunil&filename='+list_of_names
+        response = requests.post("http://127.0.0.1:5000/data_summary", json=raw_data.to_json(),params=load)
         summary_raw_data = response.content[:]
         return ([list_of_names,list_of_dates])

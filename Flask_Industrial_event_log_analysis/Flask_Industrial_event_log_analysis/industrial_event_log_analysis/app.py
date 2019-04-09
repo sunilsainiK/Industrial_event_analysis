@@ -190,11 +190,23 @@ def prepropackage():
 @app.route('/data_summary', methods=["POST"])
 def data_summary():
     data = request.get_json(force=True)
+    user = request.args.get('use')
+    file_name = request.args.get('filename')
     with open('data_json', 'w') as f:
          json.dump(data, f)
     jdf = open('data_json')
     df_json = json.load(jdf)
     df = pd.DataFrame(eval(df_json ))
+    connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
+    database='Event_Analysis')
+    cur = connection.cursor()
+    cur.execute('INSERT INTO raw_data (user_name, r_data, raw_data) VALUES(%s,%s,%s)', (user, data, file_name))
+    connection.commit()
+    print('commited')
+    cur.execute('SELECT r_data  FROM  raw_data INNER JOIN  projects ON raw_data.user_name = projects.user_name')
+    raw_data_user = cur.fetchall()
+    cur.close()
+    connection.close()
     df.to_csv('df_raw',index=False)
     df_1 = pd.read_csv('df_raw')
     sum_df_1 = raw_data_summary(df_1)
