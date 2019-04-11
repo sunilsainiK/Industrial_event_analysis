@@ -23,7 +23,7 @@ def button_values(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-           btn_values.append(html.Div(html.Button(list[i] ,id='info'+str(i),title=value,style={'width':'80%',
+           btn_values.append(html.Div(html.Button(list[i] ,id='info'+str(i),n_clicks=0,title=value,style={'width':'80%',
                                                                                    'margin-top':'4%',
                                                                                    'margin-left':'4%',
                                                                                    'margin-bottom':'4%'}),
@@ -211,8 +211,10 @@ for val in  range(len(list)):
                 print(title)
                 algs = 'algs='+title
                 alg_args = requests.get("http://127.0.0.1:5000/get_pre_Args",params=algs)
-                print(alg_args.text)
-            return html.Div([html.Input(placeholder='enter'),
+                no_of_arg = re.split(',',alg_args.text)
+                print(len(no_of_arg))
+                print(no_of_arg)
+            return html.Div([dcc.Input(placeholder='enter'),
             html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
 
 
@@ -228,6 +230,8 @@ for val in range(len(list)):
 
 for val in range(len(list)):
     if not  list[val]=='':
+        inp_val = list[val]+str(val)
+        inp_val = inp_val+'prep_box'
         @app.callback(Output(generate_output_id(inp_val),"style"),
         [Input(generate_input_id(val),'n_clicks')])
         def close_dialog_div(n):
