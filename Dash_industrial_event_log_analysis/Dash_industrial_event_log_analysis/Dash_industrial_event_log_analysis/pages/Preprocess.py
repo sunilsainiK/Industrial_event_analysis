@@ -23,11 +23,12 @@ def button_values(list):
     for i in range (len(list)):
        if not  list[i]=='':
            value=list[i]
-           btn_values.append(html.Div(html.Button(list[i] ,id='id_0_'+str(i),n_clicks=0,title=value,style={'width':'80%',
+           btn_values.append(html.Div(html.Button(list[i] ,id='info'+str(i),title=value,style={'width':'80%',
                                                                                    'margin-top':'4%',
                                                                                    'margin-left':'4%',
                                                                                    'margin-bottom':'4%'}),
                                                                                    className="row"))
+           print('info'+str(i))
     return btn_values
 
 def info_prep(list):
@@ -41,6 +42,8 @@ def info_prep(list):
                                                                                           'margin-bottom':'95%'}),style={'margin-top':'4%',
                                                                                                                         'margin-bottom':'4%'},
                                                                                           className="row"))
+           print('info'+value)
+
     return btn
 
 def info(list):
@@ -50,8 +53,20 @@ def info(list):
        if not  list[i]=='':
            value=list[i]
            val.append(html.Div(id=value,className="row"))
-
     return  val
+
+
+
+
+def prep_dialog_box(list):
+    i=1
+    val=[]
+    for i in range (len(list)):
+
+        if not list[i]=='':
+            val.append(html.Div(id=list[i]+str(i)+'prep_box', className="row"))
+            print(list[i]+str(i)+'prep_box')
+    return val
 
 layout = html.Div(
        html.Div([
@@ -84,9 +99,8 @@ layout = html.Div(
                                 style={'float':'left','width':'20%','border':'solid','overflowY':'scroll','height':'500px'}),
 #InfoBox
              html.Div(info(list),className="seven columns"),
+             html.Div(prep_dialog_box(list),className="seven columns"),
 ]),
-
-
 
 # Process data
 
@@ -135,7 +149,6 @@ layout = html.Div(
 
 )
 
-
 def generate_output_id(value1):
     return '{}'.format(value1)
 
@@ -177,6 +190,47 @@ for val in range(len(list)):
         @app.callback(Output(generate_output_id(list[val]),"style"),
         [Input(generate_input_id(list[val]),'n_clicks')],)
         def close_info_div(n):
+            if  n > 0:
+                print('div',n)
+                return {"display": "block"}
+            return  {"display": "none"}
+
+
+#Show prep Dialog Box
+for val in  range(len(list)):
+    if  not  list[val]=='':
+        inp_val = list[val]+str(val)
+        inp_val = inp_val+'prep_box'
+        print(inp_val)
+        print('info'+list[val])
+        @app.callback(Output(generate_output_id(inp_val),'children'),
+        [Input(generate_input_id(val),'n_clicks')],
+        [State(generate_input_id(val),'title')],)
+        def dialog_box(n_clicks, title):
+            if not ((n_clicks is None)  or (n_clicks==0)):
+                print(title)
+                algs = 'algs='+title
+                alg_args = requests.get("http://127.0.0.1:5000/get_pre_Args",params=algs)
+                print(alg_args.text)
+            return html.Div([html.Input(placeholder='enter'),
+            html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
+
+
+for val in range(len(list)):
+    if not  list[val]=='':
+        @app.callback(Output(generate_input_id(val),'n_clicks'),
+        [Input('close_dialog_panel','n_clicks')],)
+        def close_dia_panel(n):
+            print('panel',n)
+            return 0
+
+
+
+for val in range(len(list)):
+    if not  list[val]=='':
+        @app.callback(Output(generate_output_id(inp_val),"style"),
+        [Input(generate_input_id(val),'n_clicks')])
+        def close_dialog_div(n):
             if  n > 0:
                 print('div',n)
                 return {"display": "block"}
