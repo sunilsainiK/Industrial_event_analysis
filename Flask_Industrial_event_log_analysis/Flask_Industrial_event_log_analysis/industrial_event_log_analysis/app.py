@@ -48,7 +48,7 @@ def check_project():
        user = request.args.get('user')
        print(user)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Industrial_event_log_analysis')
+       database='Event_Analysis')
        cur = connection.cursor()
        cur.execute('INSERT INTO projects (user_name, project_name)  VALUES(%s,%s)',(user,project))
        connection.commit()
@@ -66,7 +66,7 @@ def login():
        user_name = request.args.get('pr')
        print(user_name)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Industrial_event_log_analysis')
+       database='Event_Analysis')
        print('connected')
        cur = connection.cursor()
        cur.execute('SELECT user_name FROM users WHERE user_name = %s', (user_name,))
@@ -219,7 +219,7 @@ def data_summary():
     file_name = request.args.get('filename')
 
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-    database='Industrial_event_log_analysis')
+    database='Event_Analysis')
     cur = connection.cursor()
     cur.execute('INSERT INTO raw_data (project_name, raw_data_name , raw_data_sample) VALUES(%s,%s,%s)',(project, file_name, data))
     connection.commit()

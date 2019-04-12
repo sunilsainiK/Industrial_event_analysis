@@ -17,6 +17,18 @@ prep='prepackage=PreProcessing'
 r  = requests.get("http://127.0.0.1:5000/preprocess",params=prep)
 list =re.split(',',r.text)
 
+
+columns_list = df.columns.tolist()
+type(columns_list)
+
+
+
+def layoutdialog(columns_list):
+    lay=html.Div([html.Div(dcc.Checklist(id='checklist', options=[{'label': '{}'.format(name), 'value': '{}'.format(name)} for name in columns_list],values=['{}'.format(columns_list[0])])),
+    html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
+    return lay
+
+
 def button_values(list):
     i=1
     btn_values =[]
@@ -166,7 +178,7 @@ for val in range(len(list)):
             if not ((n_clicks is None)  or (n_clicks==0)):
                 prpro_info='prestep_info='+title
                 r  = requests.get("http://127.0.0.1:5000/preprocess_Info",params=prpro_info)
-                print(r.text)
+
                 return html.Div([
                                 html.Iframe(srcDoc=r.text,style={'width':'80%',
                                 'height':'50px','border':'solid'},draggable='yes'),
@@ -180,7 +192,6 @@ for val in range(len(list)):
         @app.callback(Output(generate_input_id(list[val]),'n_clicks'),
         [Input('close_info_panel','n_clicks')],)
         def close_info_panel(n):
-            print('panel',n)
             return 0
 
 
@@ -191,7 +202,6 @@ for val in range(len(list)):
         [Input(generate_input_id(list[val]),'n_clicks')],)
         def close_info_div(n):
             if  n > 0:
-                print('div',n)
                 return {"display": "block"}
             return  {"display": "none"}
 
@@ -201,8 +211,6 @@ for val in  range(len(list)):
     if  not  list[val]=='':
         inp_val = list[val]+str(val)
         inp_val = inp_val+'prep_box'
-        print(inp_val)
-        print('info'+list[val])
         @app.callback(Output(generate_output_id(inp_val),'children'),
         [Input(generate_input_id(val),'n_clicks')],
         [State(generate_input_id(val),'title')],)
@@ -211,19 +219,17 @@ for val in  range(len(list)):
                 print(title)
                 algs = 'algs='+title
                 alg_args = requests.get("http://127.0.0.1:5000/get_pre_Args",params=algs)
-                no_of_arg = re.split(',',alg_args.text)
-                print(len(no_of_arg))
-                print(no_of_arg)
-            return html.Div([dcc.Input(placeholder='enter'),
-            html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
+            return layoutdialog(columns_list)
+
 
 
 for val in range(len(list)):
     if not  list[val]=='':
         @app.callback(Output(generate_input_id(val),'n_clicks'),
-        [Input('close_dialog_panel','n_clicks')],)
-        def close_dia_panel(n):
-            print('panel',n)
+        [Input('close_dialog_panel','n_clicks')],
+        [State('checklist','value')])
+        def close_dia_panel(n,value):
+            print(value)
             return 0
 
 
@@ -236,6 +242,6 @@ for val in range(len(list)):
         [Input(generate_input_id(val),'n_clicks')])
         def close_dialog_div(n):
             if  n > 0:
-                print('div',n)
                 return {"display": "block"}
+
             return  {"display": "none"}
