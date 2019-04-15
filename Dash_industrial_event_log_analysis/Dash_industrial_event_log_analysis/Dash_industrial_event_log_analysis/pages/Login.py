@@ -213,6 +213,7 @@ filter_table(df),
 def close_modal_callback(n, n2,pr_name,Use_name):
     if not ((n2 is None)  or (n2 == 0)):
         print('prt',n2)
+
         load = 'user='+Use_name+'&project='+pr_name
         r = requests.post("http://127.0.0.1:5000/check_project",params=load)
         return 0

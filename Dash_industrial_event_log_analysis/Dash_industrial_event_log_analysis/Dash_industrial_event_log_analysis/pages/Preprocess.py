@@ -10,24 +10,26 @@ import requests
 import plotly.plotly as py
 from plotly import figure_factory as FF
 import re
-
-
+import json
 df = pd.read_csv('df_raw')
 prep='prepackage=PreProcessing'
 r  = requests.get("http://127.0.0.1:5000/preprocess",params=prep)
 list =re.split(',',r.text)
 
-
 columns_list = df.columns.tolist()
-type(columns_list)
 
+def layoutdialog(columns_list, view_opt_list):
+    print(view_opt_list)
+    lay=html.Div([
+    html.Div(dcc.Checklist(id='checklist',
+            options=[{'label': '{}'.format(name), 'value': '{}'.format(name)} for name in columns_list],
+                    values=['{}'.format(columns_list[0])]),),
+    html.Div(html.H3('Select Option for below',style={'border':'solid'})),
+    html.Div(dcc.RadioItems(id='option_checklist',options=[{'label': '{}'.format(opt_li), 'value': '{}'.format(opt_li)} for opt_li in view_opt_list],
+        value=['{}'.format(view_opt_list[0])],labelStyle={'display': 'inline-block'},style={'border':'solid'})),
 
-
-def layoutdialog(columns_list):
-    lay=html.Div([html.Div(dcc.Checklist(id='checklist', options=[{'label': '{}'.format(name), 'value': '{}'.format(name)} for name in columns_list],values=['{}'.format(columns_list[0])])),
     html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
     return lay
-
 
 def button_values(list):
     i=1
@@ -40,7 +42,6 @@ def button_values(list):
                                                                                    'margin-left':'4%',
                                                                                    'margin-bottom':'4%'}),
                                                                                    className="row"))
-           print('info'+str(i))
     return btn_values
 
 def info_prep(list):
@@ -51,11 +52,10 @@ def info_prep(list):
            value=list[i]
            btn.append(html.Div(html.Button('i' ,id='info'+value,title=value,style={'width':'1%',
                                                                                           'margin-top':'0.2%',
-                                                                                          'margin-bottom':'95%'}),style={'margin-top':'4%',
-                                                                                                                        'margin-bottom':'4%'},
+                                                                                          'margin-bottom':'95%'}),
+                                                                                          style={'margin-top':'4%',
+                                                                                          'margin-bottom':'4%'},
                                                                                           className="row"))
-           print('info'+value)
-
     return btn
 
 def info(list):
@@ -67,17 +67,12 @@ def info(list):
            val.append(html.Div(id=value,className="row"))
     return  val
 
-
-
-
 def prep_dialog_box(list):
     i=1
     val=[]
     for i in range (len(list)):
-
         if not list[i]=='':
             val.append(html.Div(id=list[i]+str(i)+'prep_box', className="row"))
-            print(list[i]+str(i)+'prep_box')
     return val
 
 layout = html.Div(
@@ -178,13 +173,11 @@ for val in range(len(list)):
             if not ((n_clicks is None)  or (n_clicks==0)):
                 prpro_info='prestep_info='+title
                 r  = requests.get("http://127.0.0.1:5000/preprocess_Info",params=prpro_info)
-
                 return html.Div([
                                 html.Iframe(srcDoc=r.text,style={'width':'80%',
                                 'height':'50px','border':'solid'},draggable='yes'),
                                 html.Button('close',id='close_info_panel',style={'border':'solid','marginLeft':'80%'})]
                                 ,style={'border':'solid','height':'200px'})
-
 
 #setting value to zero for closing infobox
 for val in range(len(list)):
@@ -193,7 +186,6 @@ for val in range(len(list)):
         [Input('close_info_panel','n_clicks')],)
         def close_info_panel(n):
             return 0
-
 
 # controlling box hide and display based on clicks
 for val in range(len(list)):
@@ -205,7 +197,6 @@ for val in range(len(list)):
                 return {"display": "block"}
             return  {"display": "none"}
 
-
 #Show prep Dialog Box
 for val in  range(len(list)):
     if  not  list[val]=='':
@@ -216,23 +207,32 @@ for val in  range(len(list)):
         [State(generate_input_id(val),'title')],)
         def dialog_box(n_clicks, title):
             if not ((n_clicks is None)  or (n_clicks==0)):
-                print(title)
                 algs = 'algs='+title
                 alg_args = requests.get("http://127.0.0.1:5000/get_pre_Args",params=algs)
-            return layoutdialog(columns_list)
+                select_options = alg_args
 
-
+                option_list =re.split(',',select_options.text)
+                view_opt_list=[]
+                for k in range(len(option_list)):
+                    print(option_list[k])
+                    if not option_list[k]=='':
+                        print(option_list[k])
+                        view_opt_list.append(option_list[k])
+                        print(view_opt_list)
+                return layoutdialog(columns_list,view_opt_list)
 
 for val in range(len(list)):
     if not  list[val]=='':
         @app.callback(Output(generate_input_id(val),'n_clicks'),
         [Input('close_dialog_panel','n_clicks')],
-        [State('checklist','value')])
-        def close_dia_panel(n,value):
-            print(value)
+        [State('checklist','values'),
+         State('option_checklist','value')])
+        def close_dia_panel(n,values,opt):
+            pre_run={'prestep_run': values,'opt':opt}
+            print(opt)
+            print(pre_run)
+            inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",params=pre_run)
             return 0
-
-
 
 for val in range(len(list)):
     if not  list[val]=='':
@@ -243,5 +243,4 @@ for val in range(len(list)):
         def close_dialog_div(n):
             if  n > 0:
                 return {"display": "block"}
-
             return  {"display": "none"}

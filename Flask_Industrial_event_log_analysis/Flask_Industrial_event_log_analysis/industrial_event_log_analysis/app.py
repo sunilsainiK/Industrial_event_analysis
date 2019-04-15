@@ -18,7 +18,7 @@ from pandas.io.json import json_normalize
 import requests
 import psycopg2 as pg2
 from sqlalchemy.orm import sessionmaker
-from models import *
+#from models import *
 import io
 import os
 import subprocess
@@ -36,7 +36,7 @@ app = Flask(__name__)
 #app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 #app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
 
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
 
 app.secret_key =os.urandom(24)
 
@@ -48,7 +48,7 @@ def check_project():
        user = request.args.get('user')
        print(user)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Event_Analysis')
+       database='Industrial_event_log_analysis')
        cur = connection.cursor()
        cur.execute('INSERT INTO projects (user_name, project_name)  VALUES(%s,%s)',(user,project))
        connection.commit()
@@ -66,7 +66,7 @@ def login():
        user_name = request.args.get('pr')
        print(user_name)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Event_Analysis')
+       database='Industrial_event_log_analysis')
        print('connected')
        cur = connection.cursor()
        cur.execute('SELECT user_name FROM users WHERE user_name = %s', (user_name,))
@@ -99,7 +99,6 @@ def login():
            for i in range(len(project)):
                 cur.execute('SELECT raw_data_name , project_name FROM raw_data WHERE  project_name=%s', (project[i]))
                 project_table.append(cur.fetchall())
-
            cur.close()
            connection.close()
            print('got project')
@@ -129,30 +128,56 @@ def Algo_description_page():
 def algo_args():
     alg_args = request.args.get('algs')
     alg = alg_args
-    print(alg)
     alg_args = alg_args+'.py'
-    print(alg_args)
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
         for name in dirs:
             if name == 'PreProcessing':
-                print(name)
                 file_path = os.path.join(root, name)
                 with os.scandir(file_path) as entries:
                     for entry in entries:
                         if entry.is_file():
                             if not entry.name.startswith('_'):
                                 if entry.name.endswith('.py'):
-                                    print(entry.name)
-                                    print(alg_args)
                                     if entry.name == alg_args:
-                                        print(alg_args)
                                         pkl=os.path.join(file_path,alg_args)
-                                        print(pkl)
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
-                                        print(mdl)
                                         attr_Name=getattr(mdl,alg)
                                         prep_result = formatargspec(*getfullargspec(attr_Name))
+                                        l_option=re.sub('[^A-Za-z0-9]+', ',', prep_result)
+                                        l_option = l_option.split(',')
+                                        oplen=''
+                                        for i in reversed(range(len(l_option))):
+                                            if not(l_option[i]=='options'):
+                                                oplen+=','+(l_option[i])
+                                            else:
+                                                break
+                                        return oplen
+
+#get attribute
+@app.route('/run_preprocess', methods=["GET"])
+def run_algs():
+    prep_run = request.args.getlist('prestep_run')
+    opt = request.args.get('opt')
+    print(opt)
+    alg = request.args.get('algs')
+    alg='Replace_null'
+    alg_args = alg+'.py'
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            if name == 'PreProcessing':
+                file_path = os.path.join(root, name)
+                with os.scandir(file_path) as entries:
+                    for entry in entries:
+                        if entry.is_file():
+                            if not entry.name.startswith('_'):
+                                if entry.name.endswith('.py'):
+                                    if entry.name == alg_args:
+                                        pkl=os.path.join(file_path,alg_args)
+                                        mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
+                                        attr_Name=getattr(mdl,alg)(prep_run,opt,alg)
+                                        prep_result = attr_Name
                                         return prep_result
 
 #Preprossing Information
@@ -173,24 +198,23 @@ def pre_info():
                                 return send_from_directory(file_path, Prep_content_info)
 
 #runpackage
-@app.route('/run_preprocess', methods=["GET"])
-def run_pre():
-    prep_run = request.args.get('prestep_run')
-    print(prep_run)
-    dir = os.path.dirname(os.path.realpath(__file__))
-    for root, dirs, files in os.walk(dir, topdown=False):
-        for name in dirs:
-            if name == 'PreProcessing':
-                file_path = os.path.join(root, name)
-                with os.scandir(file_path) as entries:
-                    for entry in entries:
-                        if entry.is_file():
-                            if not entry.name.startswith('_'):
-                                if entry.name.endswith('.py'):
-                                    if entry.name[0]== prep_run:
-                                        print(prep_run)
-                                        prep_result = subprocess.call(entry)
-                    return(prep_result)
+#@app.route('/run_preprocess', methods=["GET"])
+#def run_pre():
+#    prep_run = request.args.get('prestep_run')
+#    print(prep_run)
+#    dir = os.path.dirname(os.path.realpath(__file__))
+#    for root, dirs, files in os.walk(dir, topdown=False):
+#        for name in dirs:
+#            if name == 'PreProcessing':
+#                file_path = os.path.join(root, name)
+#                with os.scandir(file_path) as entries:
+#                    for entry in entries:
+#                        if entry.is_file():
+#                            if not entry.name.startswith('_'):
+#                                if entry.name.endswith('.py'):
+#                                    if entry.name[0]== prep_run:
+#                                        prep_result = subprocess.call(entry)
+#                    return(prep_result)
 
 #preprocessing
 @app.route('/preprocess', methods=["GET"])
@@ -219,7 +243,7 @@ def data_summary():
     file_name = request.args.get('filename')
 
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-    database='Event_Analysis')
+    database='Industrial_event_log_analysis')
     cur = connection.cursor()
     cur.execute('INSERT INTO raw_data (project_name, raw_data_name , raw_data_sample) VALUES(%s,%s,%s)',(project, file_name, data))
     connection.commit()

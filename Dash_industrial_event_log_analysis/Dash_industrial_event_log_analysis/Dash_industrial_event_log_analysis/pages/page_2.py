@@ -3,12 +3,14 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+columns_list = ['colum1', 'colum2', 'colum3', 'colum4', 'colum5']
+view_opt_list=['avg', 'median', 'mean']
 
-layout =html.Div([
-                #html.Div(
-                html.Iframe(src='https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',style={'width':'80%',
-                'height':'50px','border':'solid'},draggable='yes'),
-
-                #html.Hr(),
-                html.Button('text',style={'border':'solid','marginLeft':'80%'})]
-                ,style={'border':'solid','height':'200px'})
+layout =  html.Div([
+        html.Div(dcc.Checklist(id='checklist',
+        options=[{'label': '{}'.format(name), 'value': '{}'.format(name)} for name in columns_list],
+                values=['{}'.format(columns_list[0])],style={'border':'solid'})),
+        html.H3('Select Option for below',style={'border':'solid'}),
+    html.Div(dcc.RadioItems(id='option_checklist',options=[{'label': '{}'.format(opt_li), 'value': '{}'.format(opt_li)} for opt_li in view_opt_list],
+    value=['{}'.format(view_opt_list[0])],labelStyle={'display': 'inline-block'},style={'border':'solid'})),
+html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
