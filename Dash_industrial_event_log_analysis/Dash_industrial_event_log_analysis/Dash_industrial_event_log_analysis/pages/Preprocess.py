@@ -238,7 +238,7 @@ for val in range(len(list)):
          State(generate_input_id(val),'n_clicks'),
          State('option_checklist','value')])
         def close_dia_panel(n,n_title,values,n_click,opt):
-            if not ((n_click is None)  or (n_click==0)):                
+            if not ((n_click is None)  or (n_click==0)):
                 print(values)
                 pre_run={'prestep_run': n_title,'opt':opt,'optedprepro':values}
                 inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",params=pre_run)
