@@ -1,5 +1,5 @@
 
-def Replace_null(*col_name, stats_sche, df,options=['mean','median','avg']):
+def Replace_null(options=['mean','median','avg'],*col_name, **kwargs):
     print(col_name)
-    print(stats_sche)
+    print(kwargs)
     return 'get options'

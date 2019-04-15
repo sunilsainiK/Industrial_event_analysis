@@ -144,14 +144,19 @@ def algo_args():
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
                                         attr_Name=getattr(mdl,alg)
                                         prep_result = formatargspec(*getfullargspec(attr_Name))
+                                        prep_result = prep_result.replace('*col_name','')
+                                        prep_result = prep_result.replace('**kwargs','')
+                                        print(prep_result)
                                         l_option=re.sub('[^A-Za-z0-9]+', ',', prep_result)
+                                        print(l_option)
                                         l_option = l_option.split(',')
                                         oplen=''
-                                        for i in reversed(range(len(l_option))):
-                                            if not(l_option[i]=='options'):
-                                                oplen+=','+(l_option[i])
-                                            else:
-                                                break
+                                        if 'options' in l_option:
+                                            for i in reversed(range(len(l_option))):
+                                                if not(l_option[i]=='options'):
+                                                   oplen+=','+(l_option[i])
+                                                else:
+                                                    break
                                         return oplen
 
 #get attribute
@@ -160,8 +165,8 @@ def run_algs():
     prep_run = request.args.getlist('prestep_run')
     opt = request.args.get('opt')
     print(opt)
-    alg = request.args.get('algs')
-    alg='Replace_null'
+    alg = request.args.get('optedprepro')
+    print(alg)
     alg_args = alg+'.py'
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
@@ -176,7 +181,9 @@ def run_algs():
                                     if entry.name == alg_args:
                                         pkl=os.path.join(file_path,alg_args)
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
-                                        attr_Name=getattr(mdl,alg)(prep_run,opt,alg)
+                                        args_list={'opt':opt,'df':alg,'col':prep_run}
+                                        attr_Name=getattr(mdl,alg)(prep_run,args_list)
+                                        #prep_result = setattr(mdl,alg,(prep_run, opt, alg))
                                         prep_result = attr_Name
                                         return prep_result
 

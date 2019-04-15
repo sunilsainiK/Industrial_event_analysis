@@ -18,15 +18,27 @@ list =re.split(',',r.text)
 
 columns_list = df.columns.tolist()
 
+
+#def opt_layout(view_opt_list):
+
+
 def layoutdialog(columns_list, view_opt_list):
-    print(view_opt_list)
+    if view_opt_list==[]:
+        display_style={'border':'solid',"display": "none"}
+        view_opt_list=['nothing','in_list']
+    else:
+        display_style={'border':'solid',"display": "block"}
+
+
     lay=html.Div([
     html.Div(dcc.Checklist(id='checklist',
             options=[{'label': '{}'.format(name), 'value': '{}'.format(name)} for name in columns_list],
                     values=['{}'.format(columns_list[0])]),),
-    html.Div(html.H3('Select Option for below',style={'border':'solid'})),
+
+
+    html.Div(html.H3('Select Option for below',style=display_style)),
     html.Div(dcc.RadioItems(id='option_checklist',options=[{'label': '{}'.format(opt_li), 'value': '{}'.format(opt_li)} for opt_li in view_opt_list],
-        value=['{}'.format(view_opt_list[0])],labelStyle={'display': 'inline-block'},style={'border':'solid'})),
+        value=['{}'.format(view_opt_list[0])],labelStyle={'display': 'inline-block'},style=display_style)),
 
     html.Button('close',id='close_dialog_panel',style={'border':'solid','marginLeft':'80%'})],)
     return lay
@@ -210,15 +222,11 @@ for val in  range(len(list)):
                 algs = 'algs='+title
                 alg_args = requests.get("http://127.0.0.1:5000/get_pre_Args",params=algs)
                 select_options = alg_args
-
                 option_list =re.split(',',select_options.text)
                 view_opt_list=[]
                 for k in range(len(option_list)):
-                    print(option_list[k])
                     if not option_list[k]=='':
-                        print(option_list[k])
                         view_opt_list.append(option_list[k])
-                        print(view_opt_list)
                 return layoutdialog(columns_list,view_opt_list)
 
 for val in range(len(list)):
@@ -226,13 +234,15 @@ for val in range(len(list)):
         @app.callback(Output(generate_input_id(val),'n_clicks'),
         [Input('close_dialog_panel','n_clicks')],
         [State('checklist','values'),
+         State(generate_input_id(val),'title'),
+         State(generate_input_id(val),'n_clicks'),
          State('option_checklist','value')])
-        def close_dia_panel(n,values,opt):
-            pre_run={'prestep_run': values,'opt':opt}
-            print(opt)
-            print(pre_run)
-            inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",params=pre_run)
-            return 0
+        def close_dia_panel(n,n_title,values,n_click,opt):
+            if not ((n_click is None)  or (n_click==0)):                
+                print(values)
+                pre_run={'prestep_run': n_title,'opt':opt,'optedprepro':values}
+                inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",params=pre_run)
+                return 0
 
 for val in range(len(list)):
     if not  list[val]=='':
@@ -241,6 +251,6 @@ for val in range(len(list)):
         @app.callback(Output(generate_output_id(inp_val),"style"),
         [Input(generate_input_id(val),'n_clicks')])
         def close_dialog_div(n):
-            if  n > 0:
+            if not ((n is None)  or (n==0)):
                 return {"display": "block"}
             return  {"display": "none"}
