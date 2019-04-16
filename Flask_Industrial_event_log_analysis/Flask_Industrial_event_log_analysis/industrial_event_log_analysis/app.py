@@ -60,6 +60,8 @@ def check_project():
        return 'data is saved'
 
 
+
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
@@ -98,7 +100,8 @@ def login():
            i=1
            for i in range(len(project)):
                 cur.execute('SELECT raw_data_name , project_name FROM raw_data WHERE  project_name=%s', (project[i]))
-                project_table.append(cur.fetchall())
+                pr_user=cur.fetchall()
+                project_table.append(pr_user)
            cur.close()
            connection.close()
            print('got project')
