@@ -123,7 +123,7 @@ def layoutdialog(columns_list, view_opt_list):
               html.Div(html.H3('Select Option for below',style=display_style_tit),id='select_option'),
               html.Div(dcc.RadioItems(id='option_checklist',
               options=[{'label': '{}'.format(opt_li), 'value': '{}'.format(opt_li)} for opt_li in view_opt_list],
-              value=['{}'.format(view_opt_list[0])],labelStyle={'display': 'inline-block'},
+              labelStyle={'display': 'inline-block'},
               style=display_style),id='opt_check'),
 
     html.Div(
@@ -349,7 +349,7 @@ for val in range(len(list)):
             if not ((n_click is None)  or (n_click==0)):
                 print(values,n_click,opt,optional_text)
                 if not optional_text =='':
-                    opt=''
+
                     pre_run={'prestep_run': n_title,'opt':opt,'optedprepro':values,'optional_text':optional_text}
                     print(pre_run)
                 else:

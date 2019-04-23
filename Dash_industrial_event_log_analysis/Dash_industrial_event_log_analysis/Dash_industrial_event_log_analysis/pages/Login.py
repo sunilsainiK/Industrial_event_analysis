@@ -220,7 +220,7 @@ def close_modal_callback(n, n2,pr_name,Use_name):
 @app.callback(Output("project_modal", "style"), [Input("new_project", "n_clicks")])
 def display_leads_modal_callback(n):
     print(n)
-    if n > 0:
+    if not ((n is None)  or (n == 0)):
         return {"display": "block"}
     return {"display": "none"}
 
