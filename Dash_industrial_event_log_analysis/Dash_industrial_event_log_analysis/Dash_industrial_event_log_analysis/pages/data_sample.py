@@ -12,11 +12,8 @@ from plotly import figure_factory as FF
 
 
 df = pd.read_csv('df_raw')
-
 df_sum = df.columns.unique()
-
 PAGE_SIZE = 5
-
 
 data_raw_sample = html.Div(
               html.Div([

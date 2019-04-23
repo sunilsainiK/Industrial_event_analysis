@@ -10,6 +10,7 @@ from pages import data_summary
 from pages import files_page
 from pages import db_page
 from pages import Home_Page
+#
 from pages import Preprocess
 from pages import Login
 from pages import Log_file
@@ -46,4 +47,4 @@ def display_page(pathname):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug= True )

@@ -29,7 +29,5 @@ layout = html.Div([
               [State('user','value')])
 def update_output(n_clicks,value):
     pr = "pr="+value
-    print(pr)
     r  = requests.get("http://127.0.0.1:5000/login",params=pr)
-    print('hi'+ r.text)
     return "/login"

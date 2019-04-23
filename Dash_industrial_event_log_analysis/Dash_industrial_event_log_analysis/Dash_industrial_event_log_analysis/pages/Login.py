@@ -126,10 +126,10 @@ def filter_table(df):
                      ),
 
      html.Button('Merge Selected Data', id='editing-rows-button',className="button button--primary",style=
-     {'text-align':'right','margin-left':'-12%','margin-top':'14%',"background": "#119DFF",
+     {'text-align':'right','margin-left':'-8%','margin-top':'22%',"background": "#119DFF",
      "border": "1px solid #119DFF","color": "white"}, n_clicks=0),
      html.A(html.Button('Prepare Data', id='prepare-data-button',className="button button--primary",style=
-     {"background": "#119DFF",'margin-left':'-22%',
+     {"background": "#119DFF",'margin-left':'-30%',
      "border": "1px solid #119DFF","color": "white"}),href='/Preprocess'),
  ])
 
@@ -213,7 +213,6 @@ filter_table(df),
 def close_modal_callback(n, n2,pr_name,Use_name):
     if not ((n2 is None)  or (n2 == 0)):
         print('prt',n2)
-
         load = 'user='+Use_name+'&project='+pr_name
         r = requests.post("http://127.0.0.1:5000/check_project",params=load)
         return 0

@@ -31,13 +31,6 @@ from sqlalchemy import text
 from inspect import formatargspec, getfullargspec
 app = Flask(__name__)
 
-
-
-#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-#app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:sunil@localhost:5432/Event_Analysis"
-
-#db = SQLAlchemy(app)
-
 app.secret_key =os.urandom(24)
 
 @app.route('/check_project', methods=['GET','POST'])
@@ -48,7 +41,7 @@ def check_project():
        user = request.args.get('user')
        print(user)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Event_Analysis')
+       database='Industrial_event_log_analysis')
        cur = connection.cursor()
        cur.execute('INSERT INTO projects (user_name, project_name)  VALUES(%s,%s)',(user,project))
        connection.commit()
@@ -68,7 +61,7 @@ def login():
        user_name = request.args.get('pr')
        print(user_name)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Event_Analysis')
+       database='Industrial_event_log_analysis')
        print('connected')
        cur = connection.cursor()
        cur.execute('SELECT user_name FROM users WHERE user_name = %s', (user_name,))
@@ -170,6 +163,7 @@ def run_algs():
     print(opt)
     alg = request.args.get('optedprepro')
     print(alg)
+    opti_text = request.args.get('optional_text')
     alg_args = alg+'.py'
     dir = os.path.dirname(os.path.realpath(__file__))
     for root, dirs, files in os.walk(dir, topdown=False):
@@ -184,7 +178,7 @@ def run_algs():
                                     if entry.name == alg_args:
                                         pkl=os.path.join(file_path,alg_args)
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
-                                        args_list={'opt':opt,'df':alg,'col':prep_run}
+                                        args_list={'opt':opt,'df':alg,'col':prep_run,'opti_text':opti_text}
                                         attr_Name=getattr(mdl,alg)(prep_run,args_list)
                                         #prep_result = setattr(mdl,alg,(prep_run, opt, alg))
                                         prep_result = attr_Name
@@ -253,14 +247,13 @@ def data_summary():
     file_name = request.args.get('filename')
 
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-    database='Event_Analysis')
+    database='Industrial_event_log_analysis')
     cur = connection.cursor()
     cur.execute('INSERT INTO raw_data (project_name, raw_data_name , raw_data_sample) VALUES(%s,%s,%s)',(project, file_name, data))
     connection.commit()
     print('commited')
     cur.execute('SELECT raw_data_sample FROM raw_data WHERE raw_data_name =%s',(file_name,))
     #'SELECT raw_data_sample  FROM  raw_data INNER JOIN  projects ON raw_data.project_name = projects.project_name')
-
     raw_data_project = cur.fetchall()
     print('raw data fetched')
     cur.close()
