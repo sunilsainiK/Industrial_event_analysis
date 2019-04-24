@@ -22,7 +22,7 @@ from sqlalchemy.orm import sessionmaker
 import io
 import os
 import subprocess
-import  PreProcessing
+from  ..PreProcessing import Mer
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 from sqlalchemy.dialects.postgresql import JSON
@@ -41,7 +41,7 @@ def check_project():
        user = request.args.get('user')
        print(user)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Industrial_event_log_analysis')
+       database='Event_Analysis')
        cur = connection.cursor()
        cur.execute('INSERT INTO projects (user_name, project_name)  VALUES(%s,%s)',(user,project))
        connection.commit()
@@ -61,7 +61,7 @@ def login():
        user_name = request.args.get('pr')
        print(user_name)
        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-       database='Industrial_event_log_analysis')
+       database='Event_Analysis')
        print('connected')
        cur = connection.cursor()
        cur.execute('SELECT user_name FROM users WHERE user_name = %s', (user_name,))
@@ -247,7 +247,7 @@ def data_summary():
     file_name = request.args.get('filename')
 
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
-    database='Industrial_event_log_analysis')
+    database='Event_Analysis')
     cur = connection.cursor()
     cur.execute('INSERT INTO raw_data (project_name, raw_data_name , raw_data_sample) VALUES(%s,%s,%s)',(project, file_name, data))
     connection.commit()
@@ -282,6 +282,24 @@ def dirname():
         for name in dirs:
             directory_list.append(os.path.join(root, name))
     return jsonify(directory_list)
+
+@app.route('/run_preprocess_class', methods=["GET"])
+def run_algs_class():
+    prep_run = request.args.getlist('prestep_run')
+    opt = request.args.get('opt')
+    print(opt)
+    alg = request.args.get('optedprepro')
+    print(alg)
+    opti_text = request.args.get('optional_text')
+    alg_args = alg+'.py'
+    df_1 = pd.read_csv('df_raw')
+    pmc = PreProcess_Class.run(df_1,{'opt':opt,'df':alg,'col':prep_run,'opti_text':opti_text})
+    attr_Name=getattr(pmc,alg)()
+    print(attr_Name)
+    return 'hi'
+
+
+
 
 
 if __name__ == '__main__':
