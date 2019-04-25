@@ -10,6 +10,7 @@ import re
 import math
 import numpy as np
 import json
+
 import urllib
 import chardet
 import importlib
@@ -22,7 +23,7 @@ from sqlalchemy.orm import sessionmaker
 import io
 import os
 import subprocess
-from  ..PreProcessing import Mer
+
 from flask_sqlalchemy import SQLAlchemy
 from os.path import basename
 from sqlalchemy.dialects.postgresql import JSON
@@ -32,6 +33,15 @@ from inspect import formatargspec, getfullargspec
 app = Flask(__name__)
 
 app.secret_key =os.urandom(24)
+
+
+
+def convert_json_data(dff):
+    data = pd.read_json(dff)
+    print(data.head())
+    return data
+
+
 
 @app.route('/check_project', methods=['GET','POST'])
 def check_project():
@@ -138,7 +148,7 @@ def algo_args():
                                     if entry.name == alg_args:
                                         pkl=os.path.join(file_path,alg_args)
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
-                                        attr_Name=getattr(mdl,alg)
+                                        attr_Name=getattr(mdl,'run')
                                         prep_result = formatargspec(*getfullargspec(attr_Name))
                                         prep_result = prep_result.replace('*col_name','')
                                         prep_result = prep_result.replace('**kwargs','')
@@ -158,6 +168,8 @@ def algo_args():
 #get attribute
 @app.route('/run_preprocess', methods=["GET"])
 def run_algs():
+    pre_pro_data = request.get_json(force=True)
+    data_for_process = convert_json_data(pre_pro_data)
     prep_run = request.args.getlist('prestep_run')
     opt = request.args.get('opt')
     print(opt)
@@ -177,12 +189,16 @@ def run_algs():
                                 if entry.name.endswith('.py'):
                                     if entry.name == alg_args:
                                         pkl=os.path.join(file_path,alg_args)
+                                        print(pkl)
                                         mdl = importlib.machinery.SourceFileLoader(alg,pkl).load_module()
                                         args_list={'opt':opt,'df':alg,'col':prep_run,'opti_text':opti_text}
-                                        attr_Name=getattr(mdl,alg)(prep_run,args_list)
+                                        print('run')
+                                        attr_Name=getattr(mdl,'run')(data_for_process,prep_run,args_list)
                                         #prep_result = setattr(mdl,alg,(prep_run, opt, alg))
                                         prep_result = attr_Name
-                                        return prep_result
+                                        prep_result.to_csv('inter_result')
+                                        print(prep_result.head())
+                                        return prep_result.to_json()
 
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])
@@ -293,7 +309,7 @@ def run_algs_class():
     opti_text = request.args.get('optional_text')
     alg_args = alg+'.py'
     df_1 = pd.read_csv('df_raw')
-    pmc = PreProcess_Class.run(df_1,{'opt':opt,'df':alg,'col':prep_run,'opti_text':opti_text})
+    pmc = alg.run(df_1,{'opt':opt,'df':alg,'col':prep_run,'opti_text':opti_text})
     attr_Name=getattr(pmc,alg)()
     print(attr_Name)
     return 'hi'

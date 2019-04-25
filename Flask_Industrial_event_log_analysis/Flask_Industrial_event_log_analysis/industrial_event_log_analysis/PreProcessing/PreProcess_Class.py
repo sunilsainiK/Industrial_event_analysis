@@ -17,6 +17,6 @@ class Precossing_Methods_class(object):
         return selected_feature_df.to_json()
 
 
-def run(org_ef,*col):
+def run(org_df,*col):
     result = Precossing_Methods_class.Select_Features(org_ef,*col)
-    return result.to_json()         
+    return result.to_json()

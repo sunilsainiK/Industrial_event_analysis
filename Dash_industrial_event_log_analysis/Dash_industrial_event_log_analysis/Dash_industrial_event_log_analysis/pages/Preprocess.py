@@ -11,6 +11,7 @@ import plotly.plotly as py
 from plotly import figure_factory as FF
 from dash.exceptions import CantHaveMultipleOutputs
 
+
 import re
 import json
 df = pd.read_csv('df_raw')
@@ -22,6 +23,7 @@ display_style={}
 view_opt_list=[]
 prepro_display={}
 df_inter_mediate = df
+dff = df
 columns_list = df.columns.tolist()
 
 add_displ=0
@@ -348,14 +350,14 @@ for val in range(len(list)):
         def close_dia_panel(n,n_title,values,n_click,opt,optional_text):
             if not ((n_click is None)  or (n_click==0)):
                 print(values,n_click,opt,optional_text)
+                global dff
                 if not optional_text =='':
-
                     pre_run={'prestep_run': n_title,'opt':opt,'optedprepro':values,'optional_text':optional_text}
                     print(pre_run)
                 else:
                     pre_run={'prestep_run': n_title,'opt':opt,'optedprepro':values}
                 print('about to enter')
-                inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",params=pre_run)
+                inter_df = requests.get("http://127.0.0.1:5000/run_preprocess",json=dff.to_json(),params=pre_run)
                 global df_inter_mediate
                 print('after run')
                 df_inter_mediate = pd.read_json(inter_df.text)
@@ -403,6 +405,7 @@ def df_to_table(df_int):
 @app.callback(Output('table','data'),
 [Input('table','pagination_settings')])
 def update_date(pagination_settings):
+    global dff
     global df_inter_mediate
     dff = df_inter_mediate
     return dff.iloc[
@@ -452,6 +455,7 @@ def update_preprcosee_data_style(n,n_save):
              Input('save_result','n_clicks')])
 def update_data(pagination_settings, n):
     global prepro_display
+    global dff
     if not ((n is None)  or (n==0)):
         global df_inter_mediate
         dff = df_inter_mediate
@@ -469,6 +473,7 @@ def update_data(pagination_settings, n):
              [Input('sample_raw_data', "pagination_settings"),
              Input('save_result','n_clicks')])
 def update_col(pagination_settings, n):
+    global dff
     if not ((n is None)  or (n==0)):
         global df_inter_mediate
         dff = df_inter_mediate
