@@ -213,13 +213,15 @@ layout = html.Div(
                                                              'text-align':'center'
                                                                }),]),
             html.A(html.Button('Back',id='log-btn',style={'text-align':'left'}),href='/login'),
+            html.A(html.Button('Model',id='Modal-btn',style={'text-align':'right','float':'right'}),href='/Modal'),
             html.Div([html.Button('update',id='up-pdata',style={'text-align':'left','margin-left':'55%',
             "background": "#119DFF",
             "border": "1px solid #119DFF","color": "white",'float':'left'},type='submit'),
-                html.Button('save result',id='save_result',style={'text-align':'left','marginTop':'-6%',
+                html.Button('save result',id='save_result',style={'text-align':'left',
                 'margin-left':'80%','float':'right',"background": "#119DFF",
                 "border": "1px solid #119DFF","color": "white"},type='submit')],
                 style={'margin-left':'50%'}),
+
 #Preprocessing lsit box
                html.Div([
                 html.Div(html.H5(children='Preprocess Options', style={'border':'solid','width':'20%'})),

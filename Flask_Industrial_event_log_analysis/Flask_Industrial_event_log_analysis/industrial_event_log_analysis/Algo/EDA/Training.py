@@ -3,7 +3,7 @@ class Run_EDA(ABC):
     def __init__(self,df):
         self.org_df = df
         #self.int_df = org_df
-    @abstractmethod
+
     def getEventProb(df):
         # dropping the bucket because probabilty of event occuring in this data frame is on day basis
         events_no_dup = events.drop(['small_period'], axis=1)
@@ -23,7 +23,7 @@ class Run_EDA(ABC):
 
         return events_count
     # for calculatin daily and conditional probabilty
-    @abstractmethod
+
     def getEventPostProbs(events, events_probs):
         events_probs_XL = events_probs[events_probs['prob'] > 1.0]
         #if(len(events_probs_XL.index) > 0):
@@ -46,7 +46,7 @@ class Run_EDA(ABC):
         #     print('Prob is nan')
         return event_post
 
-    @abstractmethod
+
     def getConditionalEventProb(events):
         events['counter'] = 1
         # create a data frame with all information how many events are contained in every bucket (e.g. day or hour)
@@ -70,14 +70,15 @@ class Run_EDA(ABC):
         avg_ratio = avg_ratio.drop(['counter_x', 'counter_y'], axis=1)
         return avg_ratio.reset_index()
 
-    @abstractmethod
+
     # filtering the probabilty based on thrasholfd which is define by user
     def filter_events_on_daily_prob(events, daily_prob, threshold):
         join = pd.merge(events, daily_prob, on=['event_type'])
         return_df = join[join['prob'] < threshold]
         return_df.drop(['prob'],axis=1)
         return return_df
-    @abstractmethod
+
+
     def score_EDA(intial_df,daily_prob,aposteriori):
         events_scoring = pd.merge(intial_df, daily_prob, on=['event_type']
         events_scoring = pd.merge(events_scoring, aposteriori, on=['event_type'], how='outer')
@@ -89,12 +90,12 @@ class Run_EDA(ABC):
         score['event_count'] = count['event_type']
         return score
 
-    @abstractmethod
+
     def genearte_sample(df):
         events_trainings = df.drop(['time'], axis=1)
         return events_trainings
 
-    @abstractmethod
+
     def result_visualize(df):
         sample_visyalize = dict(type="heatmap",z=ht,x=df.columns, y=df.columns)
         return sample_visyalize

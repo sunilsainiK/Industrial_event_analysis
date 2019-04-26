@@ -15,6 +15,7 @@ from pages import Preprocess
 from pages import Login
 from pages import Log_file
 from pages import page_2
+from pages import Modal_result
 
 import requests
 
@@ -42,6 +43,8 @@ def display_page(pathname):
         return Login.layout
     elif pathname =='/test':
         return page_2.layout
+    elif pathname == '/Modal':
+        return Modal_result.layout
     else:
         return Log_file.layout
 

@@ -200,6 +200,16 @@ def run_algs():
                                         print(prep_result.head())
                                         return prep_result.to_json()
 
+@app.route('/visual_result', methods=["GET"])
+def visual_result():
+    print('inside_g')
+    df = pd.read_csv("C:/PCK/events_score_original_EDA.csv")
+    lv=["scatterplot","barplot","lineplot"]
+    graph = {'type':lv, 'x':df.small_period , 'y':df.score }
+    return json.dumps(graph)
+
+
+
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])
 def pre_info():
@@ -216,6 +226,7 @@ def pre_info():
                             if file==prep_info:
                                 Prep_content_info = file
                                 return send_from_directory(file_path, Prep_content_info)
+
 
 #runpackage
 #@app.route('/run_preprocess', methods=["GET"])
@@ -237,6 +248,7 @@ def pre_info():
 #                    return(prep_result)
 
 #preprocessing
+
 @app.route('/preprocess', methods=["GET"])
 def prepropackage():
     info = request.args.get('prepackage')
@@ -261,7 +273,6 @@ def data_summary():
     data = request.get_json(force=True)
     project = request.args.get('pr')
     file_name = request.args.get('filename')
-
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
     database='Event_Analysis')
     cur = connection.cursor()
@@ -285,11 +296,9 @@ def data_summary():
     df_1 = pd.read_csv('df_raw')
     sum_df_1 = raw_data_summary(df_1)
     return sum_df_1.to_json()
-
 def raw_data_summary(dd_raw):
     raw_summary = dd_raw.count()
     return raw_summary
-
 @app.route('/files_name', methods=["GET"])
 def dirname():
     dir = os.path.dirname(os.path.realpath(__file__))
@@ -298,7 +307,6 @@ def dirname():
         for name in dirs:
             directory_list.append(os.path.join(root, name))
     return jsonify(directory_list)
-
 @app.route('/run_preprocess_class', methods=["GET"])
 def run_algs_class():
     prep_run = request.args.getlist('prestep_run')
@@ -313,10 +321,6 @@ def run_algs_class():
     attr_Name=getattr(pmc,alg)()
     print(attr_Name)
     return 'hi'
-
-
-
-
 
 if __name__ == '__main__':
     app.run()
