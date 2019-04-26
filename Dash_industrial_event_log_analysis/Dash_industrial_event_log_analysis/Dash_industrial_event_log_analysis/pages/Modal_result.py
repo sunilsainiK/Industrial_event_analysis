@@ -10,7 +10,14 @@ import requests
 
 
 v_r  = requests.get("http://127.0.0.1:5000/visual_result")
-print(v_r.text)
+t=(v_r.json())
+
+print(type(t))
+for key, value in t.items():
+    if key=='z':
+        print('z is there')
+    else:
+        print (key)
 
 layout = html.Div(
               html.Div([
@@ -30,7 +37,6 @@ layout = html.Div(
                                                                               #'background-color':'DodgerBlue',
                                                                               'text-align':'center'
                                                                                 })]),
-
                  html.Div([
                   html.Div(html.H5(children='Details Visualization', style={'border':'solid','width':'20%'})),
                           html.Div([

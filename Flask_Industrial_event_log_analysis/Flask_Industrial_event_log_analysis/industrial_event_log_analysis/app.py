@@ -203,10 +203,12 @@ def run_algs():
 @app.route('/visual_result', methods=["GET"])
 def visual_result():
     print('inside_g')
-    df = pd.read_csv("C:/PCK/events_score_original_EDA.csv")
+    df = pd.read_csv("C:/PCK/all-countries-data-ined-institut-national-d-etudes-demographiques.csv")
     lv=["scatterplot","barplot","lineplot"]
-    graph = {'type':lv, 'x':df.small_period , 'y':df.score }
-    return json.dumps(graph)
+    graph = {'type':lv, 'x':'small_period' , 'y':'score', 'z':'z' , 'df':df.to_json()}
+    t = json.dumps(graph)
+    print(t)
+    return t
 
 
 
