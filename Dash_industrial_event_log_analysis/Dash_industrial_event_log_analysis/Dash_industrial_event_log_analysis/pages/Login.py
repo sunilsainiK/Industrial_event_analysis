@@ -206,11 +206,11 @@ filter_table(df),
 @app.callback(
     Output("new_project", "n_clicks"),
     [Input("new_project_close", "n_clicks"),
-    Input("submit_new_project", "n_clicks"),
-    Input("new_project_name", "value"),
-    Input("User Name","value")],
+    Input("submit_new_project", "n_clicks")],
+    [State("User Name","value"),
+    State("new_project_name", 'value')],
 )
-def close_modal_callback(n, n2,pr_name,Use_name):
+def close_modal_callback(n, n2,Use_name,pr_name):
     if not ((n2 is None)  or (n2 == 0)):
         print('prt',n2)
         load = 'user='+Use_name+'&project='+pr_name
@@ -220,7 +220,7 @@ def close_modal_callback(n, n2,pr_name,Use_name):
 @app.callback(Output("project_modal", "style"), [Input("new_project", "n_clicks")])
 def display_leads_modal_callback(n):
     print(n)
-    if not ((n is None)  or (n == 0)):
+    if n > 0:
         return {"display": "block"}
     return {"display": "none"}
 

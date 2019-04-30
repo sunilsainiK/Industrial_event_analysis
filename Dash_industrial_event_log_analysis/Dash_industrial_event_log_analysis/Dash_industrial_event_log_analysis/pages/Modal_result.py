@@ -6,18 +6,17 @@ import requests
 
 
 
+print('hi')
+tr = requests.get("http://127.0.0.1:5000/run_algo")
+tr = tr.json()
+print(type(tr))
+#for key, value in tr.items():
+trace = tr
+#trace = dict(type="heatmap",z=ht,x=df.columns, y=df.columns)
 
 
 
-v_r  = requests.get("http://127.0.0.1:5000/visual_result")
-t=(v_r.json())
 
-print(type(t))
-for key, value in t.items():
-    if key=='z':
-        print('z is there')
-    else:
-        print (key)
 
 layout = html.Div(
               html.Div([
@@ -39,11 +38,18 @@ layout = html.Div(
                                                                                 })]),
                  html.Div([
                   html.Div(html.H5(children='Details Visualization', style={'border':'solid','width':'20%'})),
-                          html.Div([
-                                              html.Div(html.Div( style={'textAlign':'left'},className="seven columns"),
-                                                       style={'width':'100%','margin-top':'2%','margin-bottom':'2%','height':'400px',
-                                                       'margin-left':'2%'}),
-                                                                            ])
+
+                   dcc.Graph(
+        id='example-graph-2',
+        figure={
+            'data':[
+                    {'type':"barplot", 'x':'small_period' , 'y':'score' , 'df':df.to_json()}
+                    ],
+
+                        }
+
+    )
+
                  ])
         ])
     ])

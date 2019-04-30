@@ -11,6 +11,7 @@ import math
 import numpy as np
 import json
 
+import pickle
 import urllib
 import chardet
 import importlib
@@ -30,6 +31,8 @@ from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy import text
 from inspect import formatargspec, getfullargspec
+raw_data_name=''
+
 app = Flask(__name__)
 
 app.secret_key =os.urandom(24)
@@ -165,6 +168,7 @@ def algo_args():
                                                     break
                                         return oplen
 
+
 #get attribute
 @app.route('/run_preprocess', methods=["GET"])
 def run_algs():
@@ -200,17 +204,78 @@ def run_algs():
                                         print(prep_result.head())
                                         return prep_result.to_json()
 
+
+@app.route('/run_algo', methods=["GET"])
+def train_algs():
+    connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
+    database='Event_Analysis')
+    cur = connection.cursor()
+    data =pd.read_pickle("C:/PCK/events.pck")
+    data = data.to_json(orient='records')
+
+    global raw_data_name
+    cur.execute('INSERT INTO prepared_data (raw_data_name, prepared_data) VALUES(%s,%s)',(raw_data_name, data))
+    connection.commit()
+    #cur.execute('SELECT prepared_id  FROM prepared_data WHERE prepared_id =IDENT_CURRENT(prepared_data)')
+    cur.execute('SELECT prepared_id FROM prepared_data ORDER BY prepared_id DESC LIMIT 1')
+    prepared_data_id = cur.fetchone()
+    print(prepared_data_id,'hi')
+    cur.close()
+    connection.close()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for name in dirs:
+            print('inside_train_yfgiobfg')
+            if name == 'EDA':
+                file_path = os.path.join(root, name)
+                with os.scandir(file_path) as entries:
+                    for entry in entries:
+                        if entry.is_file():
+                            if not entry.name.startswith('_'):
+                                if entry.name.endswith('.py'):
+                                    if entry.name == 'EDA - Copy.py':
+                                        pkl=os.path.join(file_path,'EDA - Copy.py')
+                                        mdl = importlib.machinery.SourceFileLoader('EDA - Copy',pkl).load_module()
+                                        data_for_process=pd.read_csv("C:/PCK/events_for_processing.csv",dtype=str)
+                                        epa_test = data_for_process.copy()
+                                        epa_test['event_type'] = epa_test['code'] + epa_test['arg0']
+                                        epa_test = epa_test[['event_type','day','bucket']]
+                                        epa_test.columns = ['event_type','big_period','small_period']
+                                        print('run_algo')
+                                        attr_Name = getattr(mdl,'EDA')
+                                        attr_class = attr_Name()
+                                        sample_data_with_map = attr_class.sample(epa_test)
+                                        sample_data = sample_data_with_map['samples'].to_json()
+                                        map_data = json.dumps(sample_data_with_map['mapping'])
+                                        print(type(map_data))
+                                        prep_result = attr_class.sample(epa_test)['samples']
+                                        model = attr_class.train(prep_result)
+                                        model_pkl = pickle.dumps(model)
+                                        connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
+                                        database='Event_Analysis')
+                                        cur = connection.cursor()
+                                        print(model_pkl)
+                                        cur.execute('INSERT INTO samples (sample_data, map_data, model) VALUES(%s,%s,%s)',(sample_data, map_data, model_pkl))
+                                        connection.commit()
+                                        cur.close()
+                                        connection.close()
+                                        score = attr_class.score(model,prep_result)
+                                        score.to_csv('score')
+                                        vis_algo_result = attr_class.visualize(score[:100])
+                                        model.to_csv('model')
+                                        prep_result.to_csv('inter_result')
+                                        return json.dumps(vis_algo_result)
+
+
 @app.route('/visual_result', methods=["GET"])
 def visual_result():
     print('inside_g')
     df = pd.read_csv("C:/PCK/all-countries-data-ined-institut-national-d-etudes-demographiques.csv")
-    lv=["scatterplot","barplot","lineplot"]
+
     graph = {'type':lv, 'x':'small_period' , 'y':'score', 'z':'z' , 'df':df.to_json()}
+    #graph = algo.visualize()
     t = json.dumps(graph)
-    print(t)
     return t
-
-
 
 #Preprossing Information
 @app.route('/preprocess_Info', methods=["GET"])
@@ -228,6 +293,10 @@ def pre_info():
                             if file==prep_info:
                                 Prep_content_info = file
                                 return send_from_directory(file_path, Prep_content_info)
+
+
+
+
 
 
 #runpackage
@@ -248,7 +317,6 @@ def pre_info():
 #                                    if entry.name[0]== prep_run:
 #                                        prep_result = subprocess.call(entry)
 #                    return(prep_result)
-
 #preprocessing
 
 @app.route('/preprocess', methods=["GET"])
@@ -275,6 +343,9 @@ def data_summary():
     data = request.get_json(force=True)
     project = request.args.get('pr')
     file_name = request.args.get('filename')
+    global raw_data_name
+    raw_data_name = file_name
+    print(raw_data_name)
     connection = pg2.connect(user='postgres',password='sunil', host='127.0.0.1', port='5432',
     database='Event_Analysis')
     cur = connection.cursor()
@@ -292,7 +363,7 @@ def data_summary():
          json.dump(raw_data_project, f)
     jdf = open('data_json')
     df_json = json.load(jdf)
-    print(df_json)
+
     df = pd.DataFrame(df_json)
     df.to_csv('df_raw',index=False)
     df_1 = pd.read_csv('df_raw')
